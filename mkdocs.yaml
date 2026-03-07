@@ -3,7 +3,9 @@ site_author: "Daksh Vanshaj"
 
 nav:
   - Home: index.md
-  - Business Context: business_context_problem.md
+  - Business Context: business_context.md
+  - Data:
+      - Data Strategy | Pipeline : ./notebooks_docs/01_data_assessment.ipynb
 
 theme:
   name: material
