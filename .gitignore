@@ -1,0 +1,14 @@
+.env
+__pycache__
+/data 
+/images/data_architecture
+.venv
+
+*.egg-info
+
+# Guide.pdf
+# idea.md
+# steps.md
+# thoughts.md
+# implementation_plan.md
+# doing.md
