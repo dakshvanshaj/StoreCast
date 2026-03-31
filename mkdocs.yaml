@@ -1,0 +1,140 @@
+site_name: StoreCast
+site_author: "Daksh Vanshaj"
+
+nav:
+  - Home: index.md
+  - Business Context: 
+      - Report: 01_business_context.md
+      - Business Metrics: 01a_business_metrics_math.md
+      - Baseline Model: ./notebooks_docs/01_baseline.ipynb
+  - Data:
+      - Bronze EDA: ./notebooks_docs/02_bronze_eda.ipynb
+
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  primary: teal
+  accent: amber
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+    - navigation.instant
+
+plugins:
+  - search
+  - mkdocs-jupyter
+  - mermaid2
+
+repo_url: https://github.com/dakshvanshaj/storecast
+repo_name: StoreCast
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/dakshvanshaj
+
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/daksh-vanshaj-9a9650344/
+
+# site_name: Flight Prices
+# site_url: https://mydomain.org/Flights_Price_Prediction_MLOPS
+# site_description: "MLOps project for flight price prediction."
+# site_author: "Daksh Vanshaj"
+
+# theme:
+#   name: material
+#   favicon: img/favicon.ico
+#   logo: img/favicon.ico
+#   palette:
+#     # Palette toggle for light mode
+#     - scheme: default
+#       toggle:
+#         icon: material/weather-night
+#         name: Switch to dark mode
+
+#     # Palette toggle for dark mode
+#     - scheme: slate
+#       toggle:
+#         icon: material/weather-sunny
+#         name: Switch to light mode
+
+#   primary: teal
+#   accent: amber
+#   icon:
+#     repo: fontawesome/brands/github
+#   features:
+#     - navigation.tabs
+#     - navigation.sections
+#     # - navigation.instant
+#     - content.code.annotate
+#     - navigation.top
+#     - search.highlight
+#     - search.suggest
+
+# plugins:
+#   - search
+#   - mkdocs-jupyter
+#   - mermaid2
+
+# nav:
+#   - Home: index.md
+#   - About Me: about.md
+#   - QuickStart: quickstart.md
+#   - Data Journey:
+#       - "Exploratory Data Analysis": EDA/flights_eda.ipynb
+#       - "Automated EDA Report": EDA/flights_training_eda_report.html
+#       - "Data Pipelines":
+#           - Data Architecture: Data Pipelines/data_pipelines.md
+#           - Bronze Pipeline: Data Pipelines/bronze_pipeline.md
+#           - Silver Pipeline: Data Pipelines/silver_pipeline.md
+#           - Gold Pipeline: Data Pipelines/gold_pipeline.md
+#   - Modeling:
+#       - "Training & Evaluation Pipeline": Modeling/training_pipeline.md
+#       - "HyperParameter Tuning Pipeline": Modeling/tuning_pipeline.md
+#       - "Model Selection & Evaluation": Modeling/model_selection_report.md
+#       - "Model Explanability (Champion)": Modeling/model_explainability_lgbm_champ.md
+#       - "Model Comparison (Archived)": Modeling/model_explainability_lgbm_vs_xgb.md
+
+#   - Production Model Guide:
+#       - "LightGBM Details": LGBM_summary/LGBMR_production_model_details.md
+#   - UI & API:
+#       - "API Reference": API/api_reference.md
+#       - "Frontend UI": frontend.md
+#   - MLOps:
+#       - "Project Architecture": MLOps/architecture.md
+#       - "Tooling": MLOps/tools.md
+#       - "DVC Pipeline": MLOps/dvc_pipeline.md
+#       - "MLflow": MLOps/mlflow.md
+#       - "Docker": MLOps/docker.md
+#       - "DVC": MLOps/dvc.md
+#       - "Airflow": MLOps/airflow.md
+
+#   - Testing:
+#       - "Testing": Testing/testing_strategy.md
+#   - CI-CD:
+#       - "Continuous Integration": CI/ci.md
+#       - "Continuous Deployment": CD/cd.md
+# repo_url: https://github.com/dakshvanshaj/flights-price-prediction-mlops
+# repo_name: flights-price-prediction-mlops
+
+# extra:
+#   social:
+#     - icon: fontawesome/brands/github
+#       link: https://github.com/dakshvanshaj
+
+#     - icon: fontawesome/brands/linkedin
+#       link: https://www.linkedin.com/in/daksh-vanshaj-9a9650344/
+# copyright: Copyright &copy; 2025 Daksh Vanshaj
