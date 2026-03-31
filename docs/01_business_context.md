@@ -9,11 +9,15 @@
 ## 1. Executive Summary & Problem Landscape
 
 **The Current Business Environment:**
+
 Our 45-store pilot region generates an exact **$2.45 Billion** in annualized revenue (averaging ~$47.11M weekly across all stores). Despite this high volume, profitability is being constricted by an outdated, reactive approach to inventory management and promotional pricing strategy.
 
 **The Core Problem:**
+
 Currently, our demand planners rely on a rigid "Last-Year-Same-Week" (LYSW) manual heuristic to forecast inventory needs. We have evaluated this heuristic against our historical data (a process fully reproducible via our `baseline.py` script) and found it yields a **Weighted Mean Absolute Percentage Error (WMAPE) of 11.85%** and a **WMAE of $1969.91** per department per week. This forecasting error creates two simultaneous, margin-crushing scenarios:
+
 1. **Safety Stock Bloat:** We must hold excessive safety stock (roughly $216M in physical inventory) to buffer against unpredictable demand, tying up massive amounts of working capital and accumulating high warehousing and spoilage costs.
+
 2. **Untargeted Markdown Bleed:** Promotional markdowns (costing us ~$110M annually) are applied blanketly across all stores without evaluating local price elasticity, market basket associations, or regional economic conditions. We are losing gross margin on predictable items and missing cross-selling opportunities.
 
 **Target Objective:**
