@@ -6,18 +6,32 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "dagshub>=0.6.7",
+    "delta-spark>=4.1.0",
+    "deltalake[pyarrow]>=1.5.0",
     "dvc[s3]>=3.66.1",
     "gdown>=5.2.0",
     "matplotlib>=3.10.8",
+    "missingno>=0.5.2",
     "mkdocs-material>=9.7.4",
+    "mkdocs-mermaid2-plugin>=1.2.3",
     "pandas>=2.3.3",
+    "pyspark>=4.1.1",
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
+    "structlog>=25.5.0",
 ]
 
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[dependency-groups]
+dev = [
+    "pandas-stubs>=3.0.0.260204",
+]
