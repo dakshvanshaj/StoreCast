@@ -12,3 +12,8 @@ RAW_STORES_PATH  = PROJECT_ROOT / "data" / "raw" / "stores.csv"
 BRONZE_SALES_PATH = PROJECT_ROOT / "data" / "bronze" / "sales"
 BRONZE_FEATURES_PATH = PROJECT_ROOT / "data" / "bronze" / "features"
 BRONZE_STORES_PATH = PROJECT_ROOT / "data" / "bronze" / "stores"
+
+# ============ SILVER DATA PATH ============
+SILVER_SALES_PATH = PROJECT_ROOT / "data" / "silver" / "sales"
+SILVER_FEATURES_PATH = PROJECT_ROOT / "data" / "silver" / "features"
+SILVER_STORES_PATH = PROJECT_ROOT / "data" / "silver" / "stores"
