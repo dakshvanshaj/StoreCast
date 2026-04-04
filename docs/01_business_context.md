@@ -20,8 +20,22 @@ Currently, our demand planners rely on a rigid "Last-Year-Same-Week" (LYSW) manu
 
 2. **Untargeted Markdown Bleed:** Promotional markdowns (costing us ~$110M annually) are applied blanketly across all stores without evaluating local price elasticity, market basket associations, or regional economic conditions. We are losing gross margin on predictable items and missing cross-selling opportunities.
 
-**Target Objective:**
-StoreCast aims to replace this manual heuristic with an end-to-end, automated machine learning pipeline featuring Anomaly Detection, Market Basket Analysis, and advanced Demand Forecasting. By reducing our WMAPE from 11.85% to < 8.5%, segmenting stores by elasticity, and implementing targeted up-selling strategies, we project an **$8.97M annual increase in bottom-line profit** and the recovery of **$17.3M in trapped working capital**.
+**Target Objective & The Tri-Model Strategy:**
+StoreCast aims to replace this manual heuristic with an automated machine learning pipeline that attacks margin erosion from three different angles:
+
+1. **Demand Forecasting:** 
+
+Why do we need this? Currently, we over-order inventory (tying up cash) or under-order (missing sales). By using advanced algorithms to learn exactly how Holidays, CPI, and historical weeks interact, we can predict exact inventory thresholds. This directly reduces the $216M in trapped safety stock.
+
+2. **Predictive Market Basket Analysis:**
+
+Why this? We don't have individual customer receipts, but we do have Department-level sales. We will perform *Department-Level Association*. For example, if we heavily markdown Department 90 (Cameras) and lose margin there, does it cause a latent sales spike in Department 87 (Photo printing) later? If no, the markdown was wasted money.
+
+3. **Anomaly Detection:** 
+
+Why this? Retail data is notoriously dirty. If a store is closed for a week, sales drop to 0. If we feed that 0 into our forecasting model, it will skew to predict 0 sales for next year. Anomaly detection isolates these out-of-band events so they don't corrupt the core model and so regional managers are alerted instantly.
+
+By uniting these three models to natively reduce WMAPE to < 8.5% and execute targeted up-selling, we project an **$8.97M annual increase in bottom-line profit** and the recovery of **$17.3M in trapped working capital**.
 
 ---
 
