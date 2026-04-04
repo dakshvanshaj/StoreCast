@@ -33,10 +33,10 @@ def main():
         )
 
         logger.info("Converting Date to Date Type", dataset="sales")
-        sales_df = sales_df.with_columns(pl.col('date').str.to_date("%d/%m/%Y", strict=False).sort(descending=False))
+        sales_df = sales_df.with_columns(pl.col('date').str.to_date("%d/%m/%Y", strict=False)).sort('date', descending=False)
         
         logger.info("Converting Date to Date Type", dataset="features")
-        features_df = features_df.with_columns(pl.col('date').str.to_date("%d/%m/%Y", strict=False))
+        features_df = features_df.with_columns(pl.col('date').str.to_date("%d/%m/%Y", strict=False)).sort('date', descending=False)
 
         # Write to Silver 
         logger.info("Writing to Silver", dataset="sales")
