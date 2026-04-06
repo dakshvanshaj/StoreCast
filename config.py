@@ -17,3 +17,6 @@ BRONZE_STORES_PATH = PROJECT_ROOT / "data" / "bronze" / "stores"
 SILVER_SALES_PATH = PROJECT_ROOT / "data" / "silver" / "sales"
 SILVER_FEATURES_PATH = PROJECT_ROOT / "data" / "silver" / "features"
 SILVER_STORES_PATH = PROJECT_ROOT / "data" / "silver" / "stores"
+
+# ============ GOLD DATA PATH ============
+GOLD_MASTER_PATH = PROJECT_ROOT / "data" / "gold" / "master_sales.parquet"
