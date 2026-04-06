@@ -22,6 +22,18 @@ Once PySpark has landed the data as highly compressed, partitioned Delta/Parquet
 4. **Right-Sizing Compute (Financial Cost):** Because Polars can stream heavily compressed data so efficiently, launching a massive PySpark cluster to execute a simple `.clip()` or `.fillna()` on structured data is financially irresponsible. A distributed Spark cluster costs hundreds of dollars an hour. Polars can execute those exact same row transformations locally using vectorized Rust, easily fitting inside a cheap $10/month cloud container.
 3. **The Data Scientist Experience:** Data Scientists often struggle fighting PySpark's lazy-evaluation JVM errors for feature engineering. Providing them with lightning-fast Python/Rust APIs (Polars) drastically decreases Time-to-Market for generating Machine Learning Models.
 
+## Algorithm Selection Tradeoffs: Market Basket Analysis
+In standard Market Basket Analysis, algorithms like **Apriori** or **FP-Growth** are the undisputed gold standards. They are designed to find association rules (e.g., "If a customer buys Milk, they also buy Bread"). So why don't we use them in StoreCast?
+
+This is a classic example of **Data Dimensionality Constraints** shaping model architecture:
+1. **The Transaction-Level Requirement:** Apriori and FP-Growth mathematically require *transaction-level* data. The dataset must look exactly like an itemized cash-register receipt (`[Transaction_101: Milk, Bread, Eggs]`).
+2. **Our Aggregated Reality:** Our dataset's lowest grain is `Store + Department + Week`. We do *not* have individual customer receipts; we only have the total gross sales for an entire department aggregated over a 7-day period. It is mathematically impossible to feed "Weekly Sales = $10,000" into an Apriori algorithm.
+
+**The Solution (Pearson Correlation Proxy):**
+When denied ideal POS (Point of Sale) data, we must engineer a proxy. To determine if retail items are "bought together", we check their structural movement across time: *If Department 90's gross sales perfectly spike and dip alongside Department 87's gross sales over 143 consecutive weeks, they are fundamentally linked in the macro consumer behavior cycle.* 
+
+Using **Pearson Correlation Matrixing** on time-series aggregated data is the industry-standard architectural hack to extract structural association insights when raw transaction-level data is unavailable or aggressively compressed.
+
 ## Summary of the Tri-Stack Philosophy:
 - **PySpark (Bronze):** Maximizes horizontal distributed scale for raw unbounded data extraction.
 - **Polars/DuckDB (Silver/Gold):** Maximizes vertical speed and minimizes cloud computing costs for analytical processing and feature engineering on structured, partitioned data.

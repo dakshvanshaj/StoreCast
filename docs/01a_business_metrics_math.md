@@ -19,11 +19,13 @@ Working Capital is trapped in physical inventory. To calculate this:
 
 ## 3. Freed Working Capital Target ($17.29 Million)
 
-How does reducing our WMAPE (Forecasting Error) reduce inventory without causing stock-outs?
+How does reducing our ML Forecasting Error mathematically reduce inventory without causing stock-outs?
 
-- **Supply Chain Law:** Safety stock levels are directly proportional to the standard deviation of forecast error. 
-- **Target:** Reducing our manual 11.85% WMAPE absolute forecasting error by ~3.5% (down to < 8.5%) allows the supply chain to safely thin their inventory buffers by approximately 8%, as uncertainty decreases.
-- **Math:** 8% reduction on the $216.16 Million standing inventory = **$17.29 Million in freed Working Capital**.
+- **Supply Chain Law (Safety Stock):** In enterprise retail logistics, the formula for Safety Stock is:
+  `Safety Stock = Z * sqrt( (LT * σ_d^2) + (D_avg^2 * σ_LT^2) )`
+- **The Impact of ML:** The standard deviation of demand (`σ_d`) is heavily bloated by forecasting error. When Machine Learning models reduce the absolute forecasting error (WMAPE) by roughly ~3.5%, the standard deviation of that error shrinks substantially. Less unpredictability means supply chain planners no longer need to hoard "just-in-case" palettes of inventory.
+- **Target:** Planners can confidently thin out their buffer warehouse stock by approximately 8-10% mathematically without ever risking a drop in service levels (Fill Rate).
+- **Math:** An 8% reduction on the $216.16 Million standing inventory = **$17.29 Million in freed Working Capital**.
 
 ## 4. Annual Holding Cost Savings ($3.46 Million)
 
