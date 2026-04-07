@@ -11,7 +11,6 @@ raw_stores = pd.read_csv(config.RAW_STORES_PATH)
 # the date is in day/month/year format i.e d/m/Y
 raw_store_sales['Date'] = pd.to_datetime(raw_store_sales['Date'], format='%d/%m/%Y')
 raw_store_sales = raw_store_sales.sort_values(by=['Date', 'Store'], ascending=True).reset_index(drop=True)
-raw_store_sales
 
 # Current sales data
 past_data = raw_store_sales[['Store', 'Dept', 'Date', 'Weekly_Sales']].copy()
