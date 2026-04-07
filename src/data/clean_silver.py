@@ -18,6 +18,10 @@ def main():
         features_df = features_df.rename({col: col.strip().lower().replace(" ", "_") for col in features_df.columns})
         stores_df = stores_df.rename({col: col.strip().lower().replace(" ", "_") for col in stores_df.columns})
 
+        # Deduplicate overlapping sales records
+        logger.info("Deduplicating overlapping Date/Store/Dept records", dataset="sales")
+        sales_df = sales_df.unique(subset=['store', 'dept', 'date'], keep='first')
+
         logger.info("Clipping negative weekly sales to 0", dataset="sales")
         sales_df = sales_df.with_columns(pl.col('weekly_sales').clip(lower_bound=0.0))
 
