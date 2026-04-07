@@ -1,11 +1,13 @@
 import polars as pl 
 import config 
+import time
 from structlog import getLogger 
 
 logger = getLogger()
 
-def main():
+def main() -> None:
     try:
+        start_time = time.time()
         logger.info("Starting silver layer transformation", layer="silver")
 
         logger.info("Reading bronze data", source="bronze")
@@ -52,7 +54,8 @@ def main():
         logger.info("Writing to Silver", dataset="stores")
         stores_df.write_delta(str(config.SILVER_STORES_PATH), mode="overwrite")
 
-        logger.info("Silver layer transformation completed", status="success")
+        duration = round(time.time() - start_time, 2)
+        logger.info("Silver layer transformation completed", status="success", duration_seconds=duration)
 
     except Exception as e:
         logger.error("Silver layer transformation failed", error=str(e))
