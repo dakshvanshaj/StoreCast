@@ -2,12 +2,14 @@ import duckdb
 import polars as pl
 import structlog 
 import config 
+import time
 
 logger = structlog.get_logger()
 
 
 def create_gold_layer():
     try:
+        start_time = time.time()
         logger.info('Initializing duckdb engine', layer='gold', engine='duckdb')
         
         con = duckdb.connect()
@@ -81,7 +83,8 @@ def create_gold_layer():
         logger.info('Closing DuckDB connection', layer='gold')
         con.close()
 
-        logger.info('Gold layer transformation completed', layer='gold', status='success')
+        duration = round(time.time() - start_time, 2)
+        logger.info('Gold layer transformation completed', layer='gold', status='success', duration_seconds=duration)
 
     except Exception as e:
         logger.error('Gold layer transformation failed', layer='gold', error=str(e))

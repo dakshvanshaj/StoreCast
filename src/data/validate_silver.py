@@ -4,6 +4,7 @@ import pandas as pd
 import structlog 
 import config 
 import shutil 
+import time
 from pathlib import Path
 
 
@@ -120,6 +121,7 @@ def validate():
     """
     Main validation function.
     """
+    start_time = time.time()
     logger.info('Great Expectations Validation Started')
 
     logger.info('Reading Silver Data', dataset='sales')
@@ -138,14 +140,16 @@ def validate():
 
     # Summarize results
     all_success = res_sales.success and res_features.success and res_stores.success
+    duration = round(time.time() - start_time, 2)
 
     if all_success:
-        logger.info('Great Expectations Validation PASSED!', layer='silver')
+        logger.info('Great Expectations Validation PASSED!', layer='silver', duration_seconds=duration)
     else:
         logger.error('Great Expectations Validation FAILED!', 
                      sales_success=res_sales.success, 
                      features_success=res_features.success, 
-                     stores_success=res_stores.success)
+                     stores_success=res_stores.success,
+                     duration_seconds=duration)
 
     
     # GENERATE HTML REPORT
