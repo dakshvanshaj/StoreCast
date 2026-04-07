@@ -10,6 +10,16 @@ from pathlib import Path
 logger = structlog.get_logger()
 
 def build_and_run_validation(context, df, dataset_name, expectation_rules_func):
+    """
+    Helper function to build and run validation for a given dataset.
+    Parameters:
+        context: GX Context
+        df: Pandas DataFrame
+        dataset_name: Name of the dataset
+        expectation_rules_func: Function to add expectations to the suite
+    Returns:
+        ValidationResult
+    """
     logger.info(f"Adding Pandas Data Source", dataset=dataset_name)
     data_source = context.data_sources.add_pandas(f'silver_pandas_source_{dataset_name}')
     data_asset = data_source.add_dataframe_asset(f'{dataset_name}_asset') 
@@ -34,6 +44,11 @@ def build_and_run_validation(context, df, dataset_name, expectation_rules_func):
     return validation_def.run(batch_parameters={"dataframe": df})
 
 def rules_sales(suite):
+    """
+    Expectation rules for sales dataset.
+    Parameters:
+        suite: GX ExpectationSuite
+    """
     # Base check: Columns match exactly
     suite.add_expectation(gx.expectations.ExpectTableColumnsToMatchSet(
         column_set=["store", "dept", "date", "weekly_sales", "isholiday"], exact_match=True
@@ -55,6 +70,11 @@ def rules_sales(suite):
     suite.add_expectation(gx.expectations.ExpectColumnValuesToBeInTypeList(column="store", type_list=int_types))
 
 def rules_features(suite):
+    """
+    Expectation rules for features dataset.
+    Parameters:
+        suite: GX ExpectationSuite
+    """
     # Base check: Columns match exactly
     suite.add_expectation(gx.expectations.ExpectTableColumnsToMatchSet(
         column_set=["store", "date", "temperature", "fuel_price", "markdown1", "markdown2", "markdown3", "markdown4", "markdown5", "cpi", "unemployment", "isholiday"], exact_match=True
@@ -78,6 +98,11 @@ def rules_features(suite):
         suite.add_expectation(gx.expectations.ExpectColumnValuesToBeInTypeList(column=col, type_list=float_types))
 
 def rules_stores(suite):
+    """
+    Expectation rules for stores dataset.
+    Parameters:
+        suite: GX ExpectationSuite
+    """
     # Base check: Columns match exactly
     suite.add_expectation(gx.expectations.ExpectTableColumnsToMatchSet(
         column_set=["store", "type", "size"], exact_match=True
@@ -92,6 +117,9 @@ def rules_stores(suite):
     suite.add_expectation(gx.expectations.ExpectColumnValuesToBeInSet(column="type", value_set=["A", "B", "C"]))
 
 def validate():
+    """
+    Main validation function.
+    """
     logger.info('Great Expectations Validation Started')
 
     logger.info('Reading Silver Data', dataset='sales')
@@ -129,7 +157,7 @@ def validate():
     
     if tmp_path_str:
         tmp_dir = Path(tmp_path_str).parent
-        target_dir = config.PROJECT_ROOT / "docs" / "gx_data_docs"
+        target_dir = config.PROJECT_ROOT / "docs" / "gx_data_docs_silver"
         
         if tmp_dir.exists():
             if target_dir.exists():
