@@ -12,6 +12,8 @@ nav:
       - Silver Transformation: scripts_docs/clean_silver_doc.md
   - Data Architecture:
       - Tech Stack & Tradeoffs: 02_architecture_tradeoffs.md
+      - Medallion Complete Diagram: 03_medallion_architecture.md
+      - MLOps Infrastructure: 04_mlops_infrastructure.md
   - Data Analysis:
       - Bronze EDA: ./notebooks_docs/02_bronze_eda.ipynb
       - Silver EDA: ./notebooks_docs/03_silver_eda.ipynb

@@ -2,6 +2,7 @@
 
 **Project Name:** StoreCast  
 **Date:** April 2026  
+**Author:** Daksh Vanshaj
 **Document Goal:** Having proven that our initial Machine Learning models can outperform our baseline manual heuristics, this report maps the hard financial numbers to answer: *Is it actually worth deploying and maintaining this in a production environment?*
 
 ---
