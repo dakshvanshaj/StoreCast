@@ -5,7 +5,7 @@ from structlog import getLogger
 
 logger = getLogger()
 
-def main() -> None:
+def create_silver_layer() -> None:
     try:
         start_time = time.time()
         logger.info("Starting silver layer transformation", layer="silver")
@@ -62,4 +62,4 @@ def main() -> None:
         raise
 
 if __name__ == "__main__":
-    main()
+    create_silver_layer()

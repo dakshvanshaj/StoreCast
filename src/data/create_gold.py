@@ -72,6 +72,7 @@ def create_gold_layer():
                 ON s.store = f.store AND s.date = f.date
             LEFT JOIN delta_scan('{config.SILVER_STORES_PATH}') st
                 ON s.store = st.store
+            ORDER BY s.date, s.store, s.dept
         """
 
         con.execute(gold_sql)

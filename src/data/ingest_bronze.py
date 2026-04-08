@@ -6,7 +6,7 @@ import config
 
 logger = structlog.get_logger()
 
-def main():
+def create_bronze_layer() -> None :
     logger.info("bronze_ingestion_started", datasets=["sales", "features", "stores"])
     
     # 1. Delta Lake Configuration Builder
@@ -43,4 +43,4 @@ def main():
         spark.stop()
 
 if __name__ == "__main__":
-    main()
+    create_bronze_layer()
