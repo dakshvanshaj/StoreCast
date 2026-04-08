@@ -1,0 +1,22 @@
+stages:
+  create_bronze:
+    cmd: uv run python -m src.data.ingest_bronze
+    deps:
+    - data/raw
+    - src/data/ingest_bronze.py
+    outs:
+    - data/bronze
+  create_silver:
+    cmd: uv run python -m src.data.clean_silver
+    deps:
+    - data/bronze
+    - src/data/clean_silver.py
+    outs:
+    - data/silver
+  create_gold:
+    cmd: uv run python -m src.data.create_gold
+    deps:
+    - data/silver
+    - src/data/create_gold.py
+    outs:
+    - data/gold

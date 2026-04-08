@@ -1,0 +1,56 @@
+schema: '2.0'
+stages:
+  create_bronze:
+    cmd: uv run python -m src.data.ingest_bronze
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: 753b49fb52d92c15d41a5e507ffbe687.dir
+      size: 13435365
+      nfiles: 3
+    - path: src/data/ingest_bronze.py
+      hash: md5
+      md5: c4d0ad97734651bb55eaf2fe68d29882
+      size: 1809
+    outs:
+    - path: data/bronze
+      hash: md5
+      md5: a5087113b173552d1211bbd4e08b1932.dir
+      size: 2745881
+      nfiles: 112
+  create_silver:
+    cmd: uv run python -m src.data.clean_silver
+    deps:
+    - path: data/bronze
+      hash: md5
+      md5: a5087113b173552d1211bbd4e08b1932.dir
+      size: 2745881
+      nfiles: 112
+    - path: src/data/clean_silver.py
+      hash: md5
+      md5: f5d6c01e81ecc60123d591b04c006b19
+      size: 3163
+    outs:
+    - path: data/silver
+      hash: md5
+      md5: 24962095e1dc752eb7f4b9c81dad14cd.dir
+      size: 3527113
+      nfiles: 6
+  create_gold:
+    cmd: uv run python -m src.data.create_gold
+    deps:
+    - path: data/silver
+      hash: md5
+      md5: 24962095e1dc752eb7f4b9c81dad14cd.dir
+      size: 3527113
+      nfiles: 6
+    - path: src/data/create_gold.py
+      hash: md5
+      md5: c7b732ce77eebaeaa3972cb36736c477
+      size: 3492
+    outs:
+    - path: data/gold
+      hash: md5
+      md5: d3751374bc3fdf982e22e87ed56a14a3.dir
+      size: 7028886
+      nfiles: 1
