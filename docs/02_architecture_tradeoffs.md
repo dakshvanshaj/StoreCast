@@ -34,6 +34,16 @@ When denied ideal POS (Point of Sale) data, we must engineer a proxy. To determi
 
 Using **Pearson Correlation Matrixing** on time-series aggregated data is the industry-standard architectural hack to extract structural association insights when raw transaction-level data is unavailable or aggressively compressed.
 
+## Why DVC over dbt for Pipeline Orchestration?
+In modern data engineering, **dbt (Data Build Tool)** is the undisputed industry standard for the transformation layer. It excels at turning raw data inside a cloud Data Warehouse (like Snowflake or BigQuery) into clean Silver/Gold tables using templated SQL, while automatically managing the execution DAG (dependency graph).
+
+So why didn't we use it in StoreCast? 
+
+1. **The Infrastructure Constraint:** dbt requires an underlying database engine to run its SQL against (usually a massive, expensive cloud warehouse). By choosing DuckDB and Polars on local Delta Lake files, we maintain a "$0 budget, lightning-fast local compute" constraint. Standing up a warehouse just to use dbt would be massive overkill.
+2. **Machine Learning vs. Business Intelligence:** dbt is built for *Analytics Engineers* feeding Business Intelligence dashboards. However, our persona is a *Machine Learning Engineer*. We need to execute complex mathematics (like training Anomaly Detection isolation forests or target encoding) that SQL handles poorly. A pure Python ecosystem gives us the flexibility to seamlessly mix data engineering with advanced Scikit-Learn logic.
+3. **The DVC Solution:** We replicated dbt's primary superpower—the DAG orchestration—using **DVC (Data Version Control)**. Instead of dbt figuring out our SQL dependencies, DVC dynamically tracks our Python scripts (`ingest_bronze.py` → `clean_silver.py` → `create_gold.py`), caches the intermediate outputs, and gives us full data-versioning rigor all without leaving Python.
+
 ## Summary of the Tri-Stack Philosophy:
 - **PySpark (Bronze):** Maximizes horizontal distributed scale for raw unbounded data extraction.
 - **Polars/DuckDB (Silver/Gold):** Maximizes vertical speed and minimizes cloud computing costs for analytical processing and feature engineering on structured, partitioned data.
+- **DVC (Orchestration):** Replaces dbt by providing granular dependency tracking and data versioning entirely within a Python-native ML environment.

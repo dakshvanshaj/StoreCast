@@ -1,6 +1,6 @@
 site_name: StoreCast
 site_author: "Daksh Vanshaj"
-
+logo: images/logo.png
 nav:
   - Home: index.md
   - Business Context: 
@@ -14,9 +14,15 @@ nav:
       - Tech Stack & Tradeoffs: 02_architecture_tradeoffs.md
   - Data Analysis:
       - Bronze EDA: ./notebooks_docs/02_bronze_eda.ipynb
+      - Silver EDA: ./notebooks_docs/03_silver_eda.ipynb
+  - Feasibility Study:
+      - Feasibility Report: feasibility_report.md
+      - Baseline Feasibility Study: ./notebooks_docs/04_feasibility_study.ipynb
+      
 
 theme:
   name: material
+  logo: images/logo.png
   palette:
     # Palette toggle for light mode
     - scheme: default
