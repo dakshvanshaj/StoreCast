@@ -28,21 +28,21 @@ stages:
       nfiles: 112
     - path: src/data/clean_silver.py
       hash: md5
-      md5: f5d6c01e81ecc60123d591b04c006b19
-      size: 3163
+      md5: e695b185256ddbad79b0451e414131d2
+      size: 3398
     outs:
     - path: data/silver
       hash: md5
-      md5: 24962095e1dc752eb7f4b9c81dad14cd.dir
-      size: 3527113
+      md5: 0ba5de27b6aad9a05e561f2658dee058.dir
+      size: 3527734
       nfiles: 6
   create_gold:
     cmd: uv run python -m src.data.create_gold
     deps:
     - path: data/silver
       hash: md5
-      md5: 24962095e1dc752eb7f4b9c81dad14cd.dir
-      size: 3527113
+      md5: 0ba5de27b6aad9a05e561f2658dee058.dir
+      size: 3527734
       nfiles: 6
     - path: src/data/create_gold.py
       hash: md5
@@ -51,6 +51,6 @@ stages:
     outs:
     - path: data/gold
       hash: md5
-      md5: d3751374bc3fdf982e22e87ed56a14a3.dir
-      size: 7028886
+      md5: a4ccd8d327dc416e96e4457e36fcde27.dir
+      size: 7028636
       nfiles: 1
