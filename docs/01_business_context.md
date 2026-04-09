@@ -59,7 +59,7 @@ To ensure executive alignment, our targets are bound by strict retail financial 
 
 This project operates within a highly constrained, lean environment to maximize immediate ROI.
 
-- **Budget:** **$0 (Zero Dollar Capital Expenditure).** All infrastructure leverages entirely open-source analytics (Polars, XGboost, Pandas) and leverages existing hardware via a lean containerized cluster (Kubernetes/Docker Desktop).
+- **Budget:** **Infrastructure-Light (Zero Cloud Lock-in).** All infrastructure leverages entirely open-source analytics (Polars, XGboost, Pandas) and leverages existing hardware via a lean containerized cluster (Kubernetes/Docker Desktop).
 - **Timeline:** **10 Days** from ideation to full operational dashboard deployment.
 - **Staffing Requirements:** 1 Senior ML Engineer & Data Analyst serving as a full-stack MLOps lead.
 - **Time/Labor Saved:** The pipeline will automate the forecasting of 4,455 individual time series (45 stores × 99 departments). This reallocates **320 manual hours/month** across our 4 Regional Demand Planners, freeing them to handle strategic out-of-stock interventions rather than spreadsheet calculations.

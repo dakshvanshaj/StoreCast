@@ -58,7 +58,7 @@ According to the mathematical framework outlined in `01a_business_metrics_math.m
 
 ## 4. Real-World Deployment & Operational Costs (The Downside)
 
-While the initial development budget for StoreCast is $0 (leveraging open-source tools for local testing), a real-world enterprise cloud rollout will incur costs.
+While the initial development footprint for StoreCast utilizes local open-source tools (minimizing cloud overhead), a real-world enterprise cloud rollout will incur costs.
 
 ### A. Infrastructure & Cloud Compute
 *This is an estimate based on the current architecture and can be optimized further.*

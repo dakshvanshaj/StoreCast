@@ -39,9 +39,19 @@ In modern data engineering, **dbt (Data Build Tool)** is the undisputed industry
 
 So why didn't we use it in StoreCast? 
 
-1. **The Infrastructure Constraint:** dbt requires an underlying database engine to run its SQL against (usually a massive, expensive cloud warehouse). By choosing DuckDB and Polars on local Delta Lake files, we maintain a "$0 budget, lightning-fast local compute" constraint. Standing up a warehouse just to use dbt would be massive overkill.
+1. **The Infrastructure Constraint:** dbt requires an underlying database engine to run its SQL against (usually a massive, expensive cloud warehouse). By choosing DuckDB and Polars on local Delta Lake files, we maintain our "decoupled, lightning-fast local compute" constraint. Standing up a warehouse just to use dbt would be massive overkill.
 2. **Machine Learning vs. Business Intelligence:** dbt is built for *Analytics Engineers* feeding Business Intelligence dashboards. However, our persona is a *Machine Learning Engineer*. We need to execute complex mathematics (like training Anomaly Detection isolation forests or target encoding) that SQL handles poorly. A pure Python ecosystem gives us the flexibility to seamlessly mix data engineering with advanced Scikit-Learn logic.
 3. **The DVC Solution:** We replicated dbt's primary superpower—the DAG orchestration—using **DVC (Data Version Control)**. Instead of dbt figuring out our SQL dependencies, DVC dynamically tracks our Python scripts (`ingest_bronze.py` → `clean_silver.py` → `create_gold.py`), caches the intermediate outputs, and gives us full data-versioning rigor all without leaving Python.
+
+## Why We Intentionally Skipped a "Feature Store" (Feast / Hopsworks)
+
+**What is a Feature Store?**
+A Feature Store (like Feast or Hopsworks) is a centralized application used by large enterprises. Think of it like a massive pre-chopped ingredient fridge in a commercial kitchen. If Uber has 50 different Data Science teams building 100 different machine learning models, 40 of those teams might need a feature called `driver_average_rating`. Without a Feature Store, all 40 teams write their own separate SQL pipelines to calculate it, wasting millions of dollars in redundant compute. A feature store centralizes this: Data Engineers calculate it *once*, save it to the store, and all 50 teams just `import` it. Feature stores also hold those pre-calculated numbers in ultra-fast memory (like Redis) so models making live predictions in milliseconds (like credit card fraud) can grab the data instantly.
+
+**Why did StoreCast reject it?**
+- **Infrastructure Decoupling Strategy:** Deploying scalable Feature Stores (like Feast) requires maintaining dedicated "Always-On" cloud infrastructure (like Redis clusters). Our architecture intentionally rejects this lock-in, favoring decentralized, "Zero-Copy" compute that drastically minimizes cloud overhead.
+- **Batch SLA:** StoreCast performs *Weekly Batch Forecasting*. Our demand planners do not need predictions resolved in 50 milliseconds; they view a PowerBI dashboard updated once a day. 
+- **The "Gold Layer" as an Implicit Store:** We only have one primary pipeline. When DuckDB finishes engineering the `52-week lag` and `4-week moving average` features, it saves them directly into `master_sales.parquet`. We version that exact file with DVC. For our specific use case, that finalized Parquet file acts as our "Batch Feature Store" perfectly well without any of the enterprise overhead.
 
 ## Summary of the Tri-Stack Philosophy:
 - **PySpark (Bronze):** Maximizes horizontal distributed scale for raw unbounded data extraction.
