@@ -43,18 +43,21 @@ def create_silver_layer() -> None:
         
         logger.info("Converting Date to Date Type", dataset="features")
         features_lf = features_lf.with_columns(pl.col('date').str.to_date("%d/%m/%Y", strict=False)).sort('date', descending=False)
+        
+        logger.info("Profiling Polars Execution Tree...")
+        print(sales_lf.profile()) 
 
         # Execute Graph & Write to Silver 
         logger.info("Evaluating Lazy Graph to physical Silver Delta layer", dataset="sales")
-        sales_lf.collect().write_delta(str(config.SILVER_SALES_PATH), mode="overwrite")
+        sales_lf.collect(engine='streaming').write_delta(str(config.SILVER_SALES_PATH), mode="overwrite")
         
         logger.info("Evaluating Lazy Graph to physical Silver Delta layer", dataset="features")
-        features_lf.collect().write_delta(str(config.SILVER_FEATURES_PATH), mode="overwrite")
+        features_lf.collect(engine='streaming').write_delta(str(config.SILVER_FEATURES_PATH), mode="overwrite")
         
         logger.info("Evaluating Lazy Graph to physical Silver Delta layer", dataset="stores")
-        stores_lf.collect().write_delta(str(config.SILVER_STORES_PATH), mode="overwrite")
+        stores_lf.collect(engine='streaming').write_delta(str(config.SILVER_STORES_PATH), mode="overwrite")
 
-        duration = round(time.time() - start_time, 2)
+        duration = round(time.time() - start_time, 2) 
         logger.info("Silver layer lazy execution completed", status="success", duration_seconds=duration)
 
     except Exception as e:
