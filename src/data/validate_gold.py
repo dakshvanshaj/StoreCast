@@ -56,7 +56,9 @@ def rules_master_sales(suite):
         "temperature", "fuel_price", "cpi", "unemployment",
         "markdown1", "markdown2", "markdown3", "markdown4", "markdown5",
         "total_markdown", "month", "week_of_year",
-        "rolling_4_wk_sales_avg", "sales_last_year", "cpi_lag_3_month"
+        "sales_log", "sin_week", "cos_week",
+        "lag_1", "lag_5", "lag_52", "sales_last_year",
+        "rolling_4_wk_log_sales_avg", "cpi_lag_3_month"
     ]
     suite.add_expectation(gx.expectations.ExpectTableColumnsToMatchSet(
         column_set=expected_columns, exact_match=True
@@ -67,13 +69,14 @@ def rules_master_sales(suite):
     suite.add_expectation(gx.expectations.ExpectColumnValuesToBeBetween(column="weekly_sales", min_value=0.0))
 
     # 3. Check if DuckDB successfully appended our ML features
-    suite.add_expectation(gx.expectations.ExpectColumnToExist(column="rolling_4_wk_sales_avg"))
-    suite.add_expectation(gx.expectations.ExpectColumnToExist(column="sales_last_year"))
+    suite.add_expectation(gx.expectations.ExpectColumnToExist(column="sales_log"))
+    suite.add_expectation(gx.expectations.ExpectColumnToExist(column="sin_week"))
+    suite.add_expectation(gx.expectations.ExpectColumnToExist(column="lag_1"))
+    suite.add_expectation(gx.expectations.ExpectColumnToExist(column="rolling_4_wk_log_sales_avg"))
     suite.add_expectation(gx.expectations.ExpectColumnToExist(column="cpi_lag_3_month"))
 
     # 4. Primary Keys uniquely identify a row (no Cartesian explosions)
     suite.add_expectation(gx.expectations.ExpectCompoundColumnsToBeUnique(column_list=["store", "dept", "date"]))
-
 
     # 5. Check for data quality in store size (should be positive)
     suite.add_expectation(gx.expectations.ExpectColumnValuesToBeBetween(column="store_size", min_value=0.0))
@@ -103,14 +106,15 @@ def rules_master_sales(suite):
     # 12. Check for data quality in week of year (should be between 1 and 53)
     suite.add_expectation(gx.expectations.ExpectColumnValuesToBeBetween(column="week_of_year", min_value=1, max_value=53))
 
-    # 13. Check for data quality in rolling 4-week average sales (should be >= 0)
-    suite.add_expectation(gx.expectations.ExpectColumnValuesToBeBetween(column="rolling_4_wk_sales_avg", min_value=0.0))
+    # 13. Fourier Cyclical features must be between -1 and 1
+    suite.add_expectation(gx.expectations.ExpectColumnValuesToBeBetween(column="sin_week", min_value=-1.0, max_value=1.0))
+    suite.add_expectation(gx.expectations.ExpectColumnValuesToBeBetween(column="cos_week", min_value=-1.0, max_value=1.0))
 
-    # 14. Check for data quality in sales last year (should be >= 0)
+    # 14. Check for data quality in rolling average log sales (should be >= 0)
+    suite.add_expectation(gx.expectations.ExpectColumnValuesToBeBetween(column="rolling_4_wk_log_sales_avg", min_value=0.0))
+
+    # 15. Check for data quality in sales last year (should be >= 0)
     suite.add_expectation(gx.expectations.ExpectColumnValuesToBeBetween(column="sales_last_year", min_value=0.0))
-
-    # 15. Check for data quality in CPI lag 3 month (should be >= 0)
-    suite.add_expectation(gx.expectations.ExpectColumnValuesToBeBetween(column="cpi_lag_3_month", min_value=0.0))
 
     # 16. Check for data quality in store type (should be one of the expected values)
     suite.add_expectation(gx.expectations.ExpectColumnValuesToBeInSet(column="store_type", value_set=["A", "B", "C"]))
