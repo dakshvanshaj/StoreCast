@@ -17,62 +17,88 @@ def create_gold_layer():
         logger.info('Loading DuckDB Delta Extension', layer='gold')
         con.execute("INSTALL delta; LOAD delta;")
         
+        logger.info('Enabling DuckDB JSON Profiling', layer='gold')
+        con.execute("PRAGMA enable_profiling='json';")
+        con.execute(f"PRAGMA profile_output='{config.PROJECT_ROOT}/duckdb_profile.json';")
+        
         logger.info('Executing Joins And Feature Engineering SQL Query using DuckDB', layer='gold', query_type='window_functions')
 
         gold_sql = f"""
             CREATE OR REPLACE TABLE gold_master AS 
+            WITH calendar AS (
+                SELECT UNNEST(GENERATE_SERIES(
+                    (SELECT MIN(date) FROM delta_scan('{config.SILVER_SALES_PATH}')), 
+                    (SELECT MAX(date) FROM delta_scan('{config.SILVER_SALES_PATH}')), 
+                    INTERVAL 7 DAYS
+                )) AS date
+            ),
+            unique_stores AS (
+                SELECT DISTINCT store, dept FROM delta_scan('{config.SILVER_SALES_PATH}')
+            ),
+            scaffold AS (
+                SELECT u.store, u.dept, c.date
+                FROM unique_stores u
+                CROSS JOIN calendar c
+            ),
+            merged_data AS (
+                SELECT 
+                    s.store, s.dept, s.date,
+                    COALESCE(sales.weekly_sales, 0.0) AS weekly_sales,
+                    sales.isholiday,
+                    st.type as store_type,
+                    st.size as store_size,
+                    f.temperature,
+                    f.fuel_price,
+                    f.cpi,
+                    f.unemployment,
+                    f.markdown1,
+                    f.markdown2,
+                    f.markdown3,
+                    f.markdown4,
+                    f.markdown5,
+                    (COALESCE(f.markdown1, 0) + COALESCE(f.markdown2, 0) + COALESCE(f.markdown3, 0) + COALESCE(f.markdown4, 0) + COALESCE(f.markdown5, 0)) as total_markdown
+                FROM scaffold s
+                LEFT JOIN delta_scan('{config.SILVER_SALES_PATH}') sales 
+                    ON s.store = sales.store AND s.dept = sales.dept AND s.date = sales.date
+                LEFT JOIN delta_scan('{config.SILVER_FEATURES_PATH}') f
+                    ON s.store = f.store AND s.date = f.date
+                LEFT JOIN delta_scan('{config.SILVER_STORES_PATH}') st
+                    ON s.store = st.store
+            )
             SELECT 
-                s.store,
-                s.dept,
-                s.date,
-                s.weekly_sales,
-                s.isholiday,
-                st.type as store_type,
-                st.size as store_size,
-                f.temperature,
-                f.fuel_price,
-                f.cpi,
-                f.unemployment,
-                f.markdown1,
-                f.markdown2,
-                f.markdown3,
-                f.markdown4,
-                f.markdown5,
+                *,
+                MONTH(date) as month,
+                WEEK(date) as week_of_year,
 
-                -- Total Markdown 
-                (f.markdown1 + f.markdown2 + f.markdown3 + f.markdown4 + f.markdown5) as total_markdown,
-
-                -- Extracted Temporal Features
-                MONTH(s.date) as month,
-                WEEK(s.date) as week_of_year,
-
-                -- 1. Rolling 4-Week Average Sales (Velocity feature)
-                AVG(s.weekly_sales) OVER (
-                    PARTITION BY s.store, s.dept 
-                    ORDER BY s.date 
-                    ROWS BETWEEN 4 PRECEDING AND 1 PRECEDING
-                ) as rolling_4_wk_sales_avg,
-
-                -- 2. Seasonality Lag (Sales from exactly 52 weeks ago!)
-                LAG(s.weekly_sales, 52) OVER (
-                    PARTITION BY s.store, s.dept 
-                    ORDER BY s.date
-                ) as sales_last_year,
+                -- 1. Log Stabilized Target
+                LN(weekly_sales + 1) AS sales_log,
                 
-                -- 3. Macroeconomic CPI lag (CPI is typically published ~3 months after the reference period)
-                --    This creates a 3 month lagged CPI value per store, using the CPI from 3 months ago
-                --    to avoid look ahead bias and reflect real world data availability.
-                LAG(f.cpi, 12) OVER (
-                    PARTITION BY s.store 
-                    ORDER BY s.date
-                ) as cpi_lag_3_month
+                -- 2. Cyclical Fourier Features
+                SIN(2 * PI() * WEEK(date) / 52) AS sin_week,
+                COS(2 * PI() * WEEK(date) / 52) AS cos_week,
+                
+                -- 3. Point in Time Lags (Log Sales)
+                LAG(LN(weekly_sales + 1), 1) OVER w_momentum AS lag_1,
+                LAG(LN(weekly_sales + 1), 5) OVER w_momentum AS lag_5,
+                LAG(LN(weekly_sales + 1), 52) OVER w_momentum AS lag_52,
+                LAG(weekly_sales, 52) OVER w_momentum AS sales_last_year,
+                
+                -- 4. Rolling Momentum (Shifted 1 to prevent leakage)
+                AVG(LN(weekly_sales + 1)) OVER (
+                    PARTITION BY store, dept 
+                    ORDER BY date 
+                    ROWS BETWEEN 4 PRECEDING AND 1 PRECEDING
+                ) AS rolling_4_wk_log_sales_avg,
+                
+                -- 5. Macroeconomic CPI lag (3 months ~ 12 weeks)
+                LAG(cpi, 12) OVER (
+                    PARTITION BY store 
+                    ORDER BY date
+                ) AS cpi_lag_3_month
 
-            FROM delta_scan('{config.SILVER_SALES_PATH}') s
-            LEFT JOIN delta_scan('{config.SILVER_FEATURES_PATH}') f
-                ON s.store = f.store AND s.date = f.date
-            LEFT JOIN delta_scan('{config.SILVER_STORES_PATH}') st
-                ON s.store = st.store
-            ORDER BY s.date, s.store, s.dept
+            FROM merged_data
+            WINDOW w_momentum AS (PARTITION BY store, dept ORDER BY date)
+            ORDER BY date, store, dept
         """
 
         con.execute(gold_sql)
