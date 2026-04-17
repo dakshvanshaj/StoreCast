@@ -48,15 +48,36 @@ So why didn't we use it in StoreCast?
 2. **Machine Learning vs. Business Intelligence:** dbt is built for *Analytics Engineers* feeding Business Intelligence dashboards. However, our persona is a *Machine Learning Engineer*. We need to execute complex mathematics (like training Anomaly Detection isolation forests or target encoding) that SQL handles poorly. A pure Python ecosystem gives us the flexibility to seamlessly mix data engineering with advanced Scikit-Learn logic.
 3. **The DVC Solution:** We replicated dbt's primary superpower—the DAG orchestration—using **DVC (Data Version Control)**. Instead of dbt figuring out our SQL dependencies, DVC dynamically tracks our Python scripts (`ingest_bronze.py` → `clean_silver.py` → `create_gold.py`), caches the intermediate outputs, and gives us full data-versioning rigor all without leaving Python.
 
-## Why We Intentionally Skipped a "Feature Store" (Feast / Hopsworks)
+## Phase 4 & Phase 5 ML Pipeline Architectural Tradeoffs
 
+In Phase 4 (Experimentation) and Phase 5 (Production Deployment), we make several highly intentional architectural choices regarding our ML framework to balance development speed with production efficiency.
+
+### 1. The TransformedTargetRegressor Hack vs Native SQL
+**The Problem:** Our target variable (`weekly_sales`) requires a log transformation (to handle zero bounds and fat-tails). If you train a model on Log Sales, your predictions will be in logs. In production, business stakeholders need predictions in real dollars.
+
+**The Naive Solution:** Calculate the log in DuckDB `log1p()`, train a native model, and then try to evaluate it. 
+**Why we rejected it initially:** In our experimentation phase, we use `Optuna` and `cross_val_score` to find hyperparameter combinations that minimize our Business Metric (Weighted MAPE on real dollars). If we pass a naked model into an Optuna cross-validation loop, Optuna only sees the log-errors, not the dollar-errors. Writing manual loops to extract, `.expm1()`, and calculate WMAPE for 5 folds across 100 trials is an unmaintainable nightmare.
+
+**The StoreCast Solution (Phase 4):**
+We temporarily wrap our XGBoost algorithm inside Scikit-learn's `TransformedTargetRegressor`. This allows us to pass real dollars `y_train` into `.fit()`. Under the hood, sklearn takes the log automatically, trains the nested XGBoost, and automatically applies `np.expm1()` when predicting. This abstraction allows Optuna to elegantly score real dollar WMAPE.
+
+### 2. Ditching Scikit-Learn in Production (Phase 5)
+Once Optuna finds our optimal hyperparameters, we explicitly **drop Scikit-learn** and train a native `xgboost.Booster` for the Bentoml/FastAPI serving layer.
+
+**Why? (The Interview Answer):**
+- **Latency & Overhead:** Scikit-Learn object wrappers carry metadata overhead that slows down milliseconds-critical inference. 
+- **Serialization Vulnerabilities:** Loading sklearn `.pkl` files opens massive security and versioning vulnerabilities. A native booster can be saved cleanly as JSON or C++ binaries.
+- **Microservice Design:** By calculating the target transformation (`log1p`) directly in our DuckDB gold script, and applying the inverse transformation (`expm1`) natively in our Python API serving endpoint, we maintain a pure, un-obfuscated inference microservice.
+
+### 3. The Re-Integration of Feast (Feature Store)
 **What is a Feature Store?**
-A Feature Store (like Feast or Hopsworks) is a centralized application used by large enterprises. Think of it like a massive pre-chopped ingredient fridge in a commercial kitchen. If Uber has 50 different Data Science teams building 100 different machine learning models, 40 of those teams might need a feature called `driver_average_rating`. Without a Feature Store, all 40 teams write their own separate SQL pipelines to calculate it, wasting millions of dollars in redundant compute. A feature store centralizes this: Data Engineers calculate it *once*, save it to the store, and all 50 teams just `import` it. Feature stores also hold those pre-calculated numbers in ultra-fast memory (like Redis) so models making live predictions in milliseconds (like credit card fraud) can grab the data instantly.
+Think of it like a massive pre-chopped ingredient fridge. If multiple DS teams need a specific feature (like `lag_4_sales`), a feature store calculates it *once* and serves it to both offline training and online low-latency inference endpoints (often via Redis).
 
-**Why did StoreCast reject it?**
-- **Infrastructure Decoupling Strategy:** Deploying scalable Feature Stores (like Feast) requires maintaining dedicated "Always-On" cloud infrastructure (like Redis clusters). Our architecture intentionally rejects this lock-in, favoring decentralized, "Zero-Copy" compute that drastically minimizes cloud overhead.
-- **Batch SLA:** StoreCast performs *Weekly Batch Forecasting*. Our demand planners do not need predictions resolved in 50 milliseconds; they view a PowerBI dashboard updated once a day. 
-- **The "Gold Layer" as an Implicit Store:** We only have one primary pipeline. When DuckDB finishes engineering the `52-week lag` and `4-week moving average` features, it saves them directly into `master_sales.parquet`. We version that exact file with DVC. For our specific use case, that finalized Parquet file acts as our "Batch Feature Store" perfectly well without any of the enterprise overhead.
+**Why we initially rejected it:** We had $0 budget and our batch SLA (Weekly Forecasts) meant a flat DuckDB `master_sales.parquet` file perfectly acted as our implicit "offline" feature store.
+
+**Why we incorporate it in Phase 5:**
+To mature our portfolio into a **2026 Enterprise-Grade Platform** (like Uber Michelangelo or DoorDash), we implement Feast alongside BentoML. 
+- **The Decoupling Tradeoff:** Instead of forcing `RobustScaler` and `SimpleImputer` inside our Scikit-Learn pipelines (which causes massive data-leakage threats if scaled dynamically across a server fleet), we use Feast to retrieve identical, point-in-time correct raw feature inputs for both our Jupyter training notebooks and our BentoML online serving cache. Then, the natively robust Gradient Boosters process them flawlessly.
 
 ## Data Modeling: Star Schema vs. One Big Table (OBT)
 

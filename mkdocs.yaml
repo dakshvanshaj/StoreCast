@@ -14,9 +14,16 @@ nav:
       - Tech Stack & Tradeoffs: 02_architecture_tradeoffs.md
       - Medallion Complete Diagram: 03_medallion_architecture.md
       - MLOps Infrastructure: 04_mlops_infrastructure.md
-  - Data Analysis:
-      - Bronze EDA: ./notebooks_docs/02_bronze_eda.ipynb
-      - Silver EDA: ./notebooks_docs/03_silver_eda.ipynb
+  - Data Science & ML EDA:
+      - 01 Baseline Model: ./notebooks_docs/01_baseline.ipynb
+      - 02 Feasibility Study: ./notebooks_docs/02_feasibility_study.ipynb
+      - 03 Data Quality Profiling: ./notebooks_docs/03_data_quality_profiling.ipynb
+      - 04 Time Series EDA & Ghost Gaps: ./notebooks_docs/04_time_series_analysis.ipynb
+      - 05 TS Variance Stabilization & Normalization: ./notebooks_docs/05_time_series_analysis.ipynb
+      - 06 TS Decomposition, ACF & PACF: ./notebooks_docs/06_time_series_analysis.ipynb
+      - 07 Exogenous Sales Drivers: ./notebooks_docs/07_eda_sales_drivers.ipynb
+      - 08 ML Transformations: ./notebooks_docs/08_ml_eda_and_transformations.ipynb
+      - 09 TSA Feature Engineering: ./notebooks_docs/09_tsa_feature_engineering.ipynb
   - Feasibility Study:
       - Feasibility Report: feasibility_report.md
       - Baseline Feasibility Study: ./notebooks_docs/04_feasibility_study.ipynb
