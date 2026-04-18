@@ -9,6 +9,9 @@ This document tracks the precise commands required to reproduce the StoreCast pi
 # Sync all dependencies exactly as locked
 uv sync
 
+# Add required MLOps modules specifically needed for Phase 4
+uv add optuna dagshub
+
 # Install the project locally so internal modules resolve automatically
 uv pip install -e .
 ```
@@ -18,6 +21,13 @@ uv pip install -e .
 
 ```bash
 uv run python baseline.py
+```
+
+## 2b. MLOps Hyperparameter Optimization
+**Task**: Run the Bayesian Search grid and log tracing metrics remotely to DagsHub.
+
+```bash
+uv run python -m src.models.optimizer
 ```
 
 ## 3. Data Pipeline (Medallion Architecture)

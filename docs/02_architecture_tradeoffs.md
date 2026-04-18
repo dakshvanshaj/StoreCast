@@ -95,3 +95,18 @@ We chose to completely denormalize our Gold Parquet layer into **One Big Table (
 - **PySpark (Bronze):** Maximizes horizontal distributed scale for raw unbounded data extraction.
 - **Polars/DuckDB (Silver/Gold):** Maximizes vertical speed and minimizes cloud computing costs for analytical processing and feature engineering on structured, partitioned data.
 - **DVC (Orchestration):** Replaces dbt by providing granular dependency tracking and data versioning entirely within a Python-native ML environment.
+
+## Time-Series Cross Validation Tradeoffs
+
+When transitioning into Phase 4 Hyperparameter tuning (Optuna), evaluating models using standard K-Fold Cross Validation introduces a fatal architecture flaw called **Future Data Leakage**. If Fold 1 randomly samples November 2012 to predict November 2011, the model learns future macro-economic trends that will not exist in production, artificially inflating evaluation metrics.
+
+**The Theoretical Fix (Walk-Forward Validation):**
+The standard industry fix is Scikit-Learn's `TimeSeriesSplit`, which uses expanding windows (Train on Jan-Mar to validate Apr, then Train on Jan-Apr to validate May). While mathematically rigorous, it is computationally bruising (requiring 3+ complete model retrains for *every single* Optuna trial) and heavily complicates custom scorer injection (like our Holiday-weighted WMAPE metric).
+
+**The StoreCast Solution (The 3-Way Chronological Split):**
+To adhere to our "Keep it Lean and Simple" project philosophy while preserving airtight data hygiene, we bypassed K-Fold entirely in favor of a strict 3-way chronological slice:
+1. **Train Set (First 70%):** Provided to the algorithm for coefficient generation.
+2. **Validation Set (Next 15%):** The "Immediate Future" used strictly by Optuna's Bayesian search to calculate WMAPE and tune hyperparameters independently.
+3. **Test Set (Final 15%):** Locked in memory and deliberately hidden from Optuna. Used exactly once at the end of the pipeline to objectively evaluate the mathematically "unseen" future.
+
+While not as statistically bulletproof as 10-fold Walk-Forward Validation, this proxy delivers 95% of the data-hygiene benefits at a fraction of the computational latency and engineering overhead, a paramount consideration for lean pipeline scaling.

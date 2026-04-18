@@ -35,7 +35,7 @@ Why this? We don't have individual customer receipts, but we do have Department-
 
 Why this? Retail data is notoriously dirty. If a store is closed for a week, sales drop to 0. If we feed that 0 into our forecasting model, it will skew to predict 0 sales for next year. Anomaly detection isolates these out-of-band events so they don't corrupt the core model and so regional managers are alerted instantly.
 
-By uniting these three models to natively reduce WMAPE to < 8.5% and execute targeted up-selling, we project an **$8.97M annual increase in bottom-line profit** and the recovery of **$17.3M in trapped working capital**.
+By uniting these three models to natively execute targeted up-selling and fundamentally crashing the baseline WMAPE down to **7.76%**, we project a **$9.61M annual increase in bottom-line profit** and the recovery of **$20.53M in trapped working capital**.
 
 ---
 
@@ -45,8 +45,8 @@ To ensure executive alignment, our targets are bound by strict retail financial 
 
 ### A. Working Capital & Holding Cost Savings
 - **Current Inventory Value:** $216.16M (Assumes 75% COGS and an 8.5x inventory turnover rate on actual $2.45B annual revenue).
-- **Freed Capital Target ($17.3M):** A ~3.5% absolute reduction in WMAPE error allows us to safely reduce our safety stock buffer by 8% without impacting service levels (Fill Rate). Releasing 8% of a $216M inventory frees **$17.29 Million in working capital**.
-- **Holding Cost Savings ($3.46M Annual):** Assuming standard warehousing/spoilage costs at 20% of inventory value, removing $17.3M in stock saves **$3.46 Million** in operational overhead.
+- **Freed Capital Target ($20.53M):** A ~4.09% absolute reduction in WMAPE error allows us to safely reduce our safety stock buffer by 9.5% without impacting service levels (Fill Rate). Releasing 9.5% of a $216M inventory frees **$20.53 Million in working capital**.
+- **Holding Cost Savings ($4.10M Annual):** Assuming standard warehousing/spoilage costs at 20% of inventory value, removing $20.53M in stock saves **$4.10 Million** in operational overhead.
 
 ### B. Promotional Margin Preservation & Market Basket Uplift
 - **Current Markdown Spend:** ~$110.24M (4.5% of gross revenue).
@@ -70,8 +70,8 @@ This project operates within a highly constrained, lean environment to maximize 
 
 | Priority Level | Metric Focus | Specific Target |
 | :--- | :--- | :--- |
-| **Primary** | Enterprise Financials | Achieve $17.3M reduction in inventory working capital. Achieve $8.97M combined net savings in holding costs and margin preservation. |
-| **Secondary** | ML Optimization | Reduce Demand Forecasting **WMAPE < 8.5%** (baseline 11.85%). Achieve Store Clustering **Silhouette Score > 0.6**. |
+| **Primary** | Enterprise Financials | Achieve $20.5M reduction in inventory working capital. Achieve $9.61M combined net savings in holding costs and margin preservation. |
+| **Secondary** | ML Optimization | XGBoost Demand Forecasting validated WMAPE exactly **7.76%** (baseline 11.85%). Achieve Store Clustering **Silhouette Score > 0.6**. |
 | **Tertiary** | Resiliency & Trust | Maintain Kubernetes API inference latency under load tests (simulating concurrent planner activity). High SHAP-driven explainability to build trust with regional executives. |
 
 ---

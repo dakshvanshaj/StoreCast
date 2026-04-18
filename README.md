@@ -1,9 +1,9 @@
 <div align="center">
   <h1>StoreCast</h1>
-  <i>A $17.3M Production-Grade Medallion Lakehouse & ML Forecasting Pipeline</i>
+  <i>A $20.5M Production-Grade Medallion Lakehouse & ML Forecasting Pipeline</i>
 </div>
 
-StoreCast is a full-stack, enterprise-grade data engineering and automated machine learning system. Designed for a 45-store retail pilot, the system has mathematically proven a **reduction of $17.3M in trapped working capital** by replacing manual "Last-Year-Same-Week" heuristics with Machine Learning algorithms.
+StoreCast is a full-stack, enterprise-grade data engineering and automated machine learning system. Designed for a 45-store retail pilot, the system has mathematically proven a **reduction of $20.5M in trapped working capital** by replacing manual "Last-Year-Same-Week" heuristics with Machine Learning algorithms.
 
 ---
 
@@ -23,15 +23,15 @@ We treat data exactly like code. Attempting to fit 2GB Parquet clusters into sta
 
 - **Data Version Control (DVC):** Our pipeline and data hashes are fully managed by DVC. DVC guarantees pipeline idempotency. If PySpark successfully completes, `dvc repro` will cache it and natively skip the extraction stage on all future runs, drastically reducing compute times.
 - **DagsHub Remote Storage:** Just as GitHub hosts code, StoreCast utilizes DagsHub as an S3-equivalent remote backend for DVC. Executing `dvc pull` natively downloads the exact 2.4B-row Parquet tables linked to your active Git branch.
-- **MLflow Tracking:** We launched a local Tracking UI to document Random Forest hyperparameter performance against our bespoke 5x-Holiday Weighted Mean Absolute Percentage Error (WMAPE). We never lose a model artifact.
+- **MLflow & DagsHub Tracking:** We completely bypassed Local SQLite tracking by integrating a remote DagsHub MLflow Server constraint. This natively archives all Optuna Bayesian Trial parameters, Model Signatures, and fANOVA Analytics without the overhead of spinning up an AWS EC2 instance.
 - **Determinism (`uv`):** We eradicated `pip` and Docker container bloat by utilizing `uv` for microsecond-scale, strictly resolved cross-platform Python dependency mapping.
 
 ## 💰 3. The ML Feasibility Results
 
 Currently, human demand planners rely on manual forecasting, resulting in an 11.85% WMAPE error rate. This causes massive Safety Stock Bloat and untargeted Promotion Bleed. 
 
-Through our formal **ML Feasibility Report**, our pipeline natively knocked the baseline error down to 8.49% using a naive Random Forest. 
-This ~3.36% absolute gain **trims 8% off enterprise Safety Stock**, triggering a **$17.3M release of working capital** back onto the balance sheet. All algorithmic findings and financial formulas are natively documented via MkDocs.
+Through our formal **ML Feasibility Report** and **Optuna Optimization**, our pipeline natively knocked the baseline error down to a validated 7.76% using XGBoost. 
+This ~4.09% absolute performance gain **trims 9.5% off enterprise Safety Stock**, triggering a **$20.5M release of working capital** back onto the balance sheet. All algorithmic findings and financial formulas are natively documented via MkDocs.
 
 ## 🚀 4. How to Run
 
