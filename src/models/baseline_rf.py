@@ -7,14 +7,41 @@ from structlog import getLogger
 
 logger = getLogger()
 
+from typing import Any
+
 # 1. Custom Evaluation Metric
-def wmape_metric(y_true, y_pred, is_holiday):
+def wmape_metric(y_true: Any, y_pred: Any, is_holiday: Any) -> float:
+    """
+    Calculate the Weighted Mean Absolute Percentage Error (WMAPE).
+    
+    Holiday weeks are given 5x weight compared to normal weeks to reflect
+    the higher business impact of stockouts during promotional periods.
+
+    Args:
+        y_true (np.ndarray): Array of actual sales values.
+        y_pred (np.ndarray): Array of predicted sales values.
+        is_holiday (np.ndarray): Binary array indicating if a week is a holiday (1) or not (0).
+
+    Returns:
+        float: The calculated WMAPE score.
+    """
+    logger.debug("Calculating WMAPE metric", samples=len(y_true))
     # Holiday weeks are weighted 5x
     weights = np.where(is_holiday == 1, 5, 1)
     # WMAPE Formula: Sum of Absolute Errors / Sum of Actuals
-    return np.sum(weights * np.abs(y_true - y_pred)) / np.sum(weights * y_true)
+    return float(np.sum(weights * np.abs(y_true - y_pred)) / np.sum(weights * y_true))
 
 def run_feasibility_study() -> None:
+    """
+    Run a minimum viable ML pipeline to establish a predictive baseline.
+    
+    This function reads gold-layer data, handles missing values, splits it 
+    chronologically, trains a naive Random Forest regressor, and evaluates it 
+    using the WMAPE metric against a manual heuristic baseline.
+
+    Raises:
+        Exception: Propagates any error encountered during pipeline execution.
+    """
     try:
         start_time = time.time()
         logger.info("Initializing ML Feasibility Study...", model="RandomForest")
