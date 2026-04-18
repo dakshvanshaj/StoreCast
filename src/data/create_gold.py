@@ -104,8 +104,8 @@ def create_gold_layer():
         con.execute(gold_sql)
 
         logger.info('Exporting gold table to parquet', layer='gold')
-        config.GOLD_MASTER_PATH.parent.mkdir(parents=True, exist_ok=True)
-        con.execute(f"COPY gold_master TO '{config.GOLD_MASTER_PATH}' (FORMAT PARQUET)")
+        config.GOLD_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
+        con.execute(f"COPY gold_master TO '{config.GOLD_DATA_PATH}' (FORMAT PARQUET)")
      
         logger.info('Closing DuckDB connection', layer='gold')
         con.close()

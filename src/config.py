@@ -24,4 +24,4 @@ SILVER_STORES_PATH = DATA_DIR / "silver" / "stores"
 # ============ GOLD DATA PATH ============
 GOLD_MASTER_PATH = DATA_DIR / "gold" / "master_sales_v1.parquet"
 
-GOLD_DATASET_PATH = DATA_DIR / "gold" / "gold_sales.parquet"
+GOLD_DATA_PATH = DATA_DIR / "gold" / "gold_sales.parquet"
