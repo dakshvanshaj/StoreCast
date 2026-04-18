@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "catboost>=1.2.10",
     "dagshub>=0.6.7",
     "delta-spark>=4.1.0",
     "deltalake[pyarrow]>=1.5.0",
@@ -16,6 +17,7 @@ dependencies = [
     "ipykernel>=7.2.0",
     "jupyter>=1.1.1",
     "jupyterlab>=4.5.6",
+    "lightgbm>=4.6.0",
     "matplotlib>=3.10.8",
     "missingno>=0.5.2",
     "mkdocs-jupyter>=0.26.1",
@@ -23,6 +25,7 @@ dependencies = [
     "mkdocs-mermaid2-plugin>=1.2.3",
     "mlflow>=3.11.1",
     "notebook>=7.5.5",
+    "optuna>=4.8.0",
     "pandas>=2.3.3",
     "polars>=1.39.3",
     "pyarrow>=23.0.1",
@@ -30,8 +33,10 @@ dependencies = [
     "pytest>=9.0.2",
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
+    "shap>=0.51.0",
     "statsforecast>=2.0.3",
     "structlog>=25.5.0",
+    "xgboost>=3.2.0",
 ]
 
 [build-system]
