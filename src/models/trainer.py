@@ -7,28 +7,36 @@ from models.pipeline_factory import get_model_pipeline
 import structlog 
 from typing import Dict, Any, Tuple
 from sklearn.pipeline import Pipeline
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 logger = structlog.get_logger()
 
-def wmape_metric(y_true: Any, y_pred: Any, is_holiday: Any) -> float:
+def calculate_production_metrics(y_true: Any, y_pred: Any, is_holiday: Any) -> Dict[str, float]:
     """
-    Calculate the Weighted Mean Absolute Percentage Error (WMAPE).
+    Calculate a suite of regression performance metrics (WMAPE, MAE, RMSE, R2).
     
-    Holiday weeks are given 5x weight compared to normal weeks to reflect
-    the higher business impact of stockouts during promotional periods.
-
     Args:
         y_true (np.ndarray): Array of actual sales values.
         y_pred (np.ndarray): Array of predicted sales values.
         is_holiday (np.ndarray): Binary array indicating if a week is a holiday (1) or not (0).
 
     Returns:
-        float: The calculated WMAPE score in percentage.
+        Dict[str, float]: Dictionary mapping WMAPE, RMSE, MAE, and R2 scores.
     """
-    logger.debug("Calculating WMAPE metric", samples=len(y_true))
-    weights = np.where(is_holiday== 1, 5, 1)
+    logger.debug("Calculating Production Metric Suite", samples=len(y_true))
+    weights = np.where(is_holiday == 1, 5, 1)
 
-    return float(np.round((np.sum(weights * np.abs(y_true - y_pred)) / np.sum(weights * y_true)) * 100.0, 2))
+    wmape = float(np.round((np.sum(weights * np.abs(y_true - y_pred)) / np.sum(weights * y_true)) * 100.0, 2))
+    mae = float(np.round(mean_absolute_error(y_true, y_pred), 2))
+    rmse = float(np.round(np.sqrt(mean_squared_error(y_true, y_pred)), 2))
+    r2 = float(np.round(r2_score(y_true, y_pred), 4))
+    
+    return {
+        "WMAPE": wmape,
+        "RMSE": rmse,
+        "MAE": mae,
+        "R2": r2
+    }
 
 def prepare_data() -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series, Any, pd.DataFrame, pd.Series, Any]:
     """
@@ -99,9 +107,9 @@ def train_model(model_type: str, params: Dict[str, Any]) -> Tuple[Pipeline, Dict
     pipeline.fit(X_train, y_train)
     
     preds = pipeline.predict(X_test)
-    wmape = wmape_metric(y_test.values, preds, is_holiday_test)
+    metrics = calculate_production_metrics(y_test.values, preds, is_holiday_test)
 
-    return pipeline, {"WMAPE":wmape}
+    return pipeline, metrics
 
 
 if __name__ == '__main__':
