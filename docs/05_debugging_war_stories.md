@@ -172,3 +172,27 @@ This elegantly forces MLflow to lock the Schema signature to Floats for all nume
 
 **The Interview Takeaway:**
 When an interviewer asks about Model Deployment or Schema enforcement, drop this gem: *"One of the subtlest deployment bugs happens when you use MLflow's `infer_signature` blindly. If it infers an Integer schema during training, your production API will crash anytime it receives a missing value because Pandas casts NaNs as Floats. I always use Polars selectors to preemptively lift all Integers to Float64 at the data-prep boundary to ensure my REST APIs are mathematically bulletproof against null-coercion crashes."*
+
+---
+
+## 7. The Optuna Cloud Rate Limit Crash (HTTP 429)
+
+**The Scenario:**
+During Phase 4, we transitioned from managing MLflow logs locally in SQLite to pushing them centrally to DagsHub (a SaaS MLOps provider) over the internet. To speed up our Bayesian hyperparameter search, we set Optuna to run with `n_jobs=-1`, instructing Python to parallelize the optimization across every single core on the local CPU physically available.
+
+**The Incident:**
+The pipeline crashed spectacularly with the following network error:
+`urllib3.exceptions.ResponseError: too many 429 error responses`
+`MlflowException: API request to https://dagshub.com.../api/2.0/mlflow/runs/create failed... Max retries exceeded.`
+
+**The Root Cause (The Bug):**
+When writing models to local SQLite (`sqlite:///mlflow.db`), local hardware can easily support parallel I/O from 16 concurrent CPU cores. 
+However, when we shifted infrastructure to the cloud without altering our concurrency constraints, `n_jobs=-1` meant that 16 isolated Optuna workers were simultaneously firing `POST` HTTP requests over the network to the DagsHub API at the exact same millisecond. 
+
+DagsHub's anti-DDoS proxy essentially identified the burst traffic as a malicious attack. It structurally denied the queries, returning `HTTP 429 (Too Many Requests)`, and blocked the IP from establishing new MLflow trial runs.
+
+**The Fix:**
+We transitioned from physical speed to architectural reliability by explicitly dropping back to `n_jobs=1`. Serializing the Bayesian trials onto a single thread structurally guaranteed that the API endpoint received paced, manageable network loads that bypassed the free-tier firewall limits.
+
+**The Interview Takeaway:**
+This is an absolute gold-mine response for scaling questions: *"In my previous project, I broke our ML optimization pipeline when transitioning to a remote MLOps backend tracking server. I left `n_jobs=-1` in my Optuna sweep, which worked on local SQLite, but instantly D-DoSed the remote MLflow API proxy resulting in HTTP 429 HTTP crashes. It taught me a permanent lesson about gracefully degrading parallel architectures depending on the specific network bottleneck and rate limits of your cloud provider."*
