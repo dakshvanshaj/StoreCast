@@ -23,11 +23,22 @@ uv pip install -e .
 uv run python baseline.py
 ```
 
-## 2b. MLOps Hyperparameter Optimization
+## 2b. MLOps Hyperparameter Optimization & Model Registry
 **Task**: Run the Bayesian Search grid and log tracing metrics remotely to DagsHub.
-
 ```bash
 uv run python -m src.models.optimizer
+```
+
+## 2c. SHAP Model Explainability
+**Task**: Rip the decision tree weights from the serverless `@production` model and generate Game-Theoretic visual analytics to `docs/images/shap/`.
+```bash
+uv run python -m src.models.explainability
+```
+
+## 2d. Operational Batch Inference
+**Task**: Run the live Batch Inference engine to dynamically score future data arrays, outputting the final business forecast table.
+```bash
+uv run python -m src.models.batch_inference
 ```
 
 ## 3. Data Pipeline (Medallion Architecture)

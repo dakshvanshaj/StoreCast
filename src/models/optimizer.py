@@ -3,13 +3,15 @@ import mlflow
 import structlog
 import logging
 import warnings
+import time
 import config_ml
 import optuna.visualization.matplotlib as vis
 import matplotlib.pyplot as plt
 import dagshub
 from mlflow.models.signature import infer_signature
-from models.trainer import prepare_data, wmape_metric
+from models.trainer import prepare_data, calculate_production_metrics
 from models.pipeline_factory import get_model_pipeline
+from mlflow.tracking import MlflowClient
 
 dagshub.init(repo_owner='dakshvanshaj', repo_name='StoreCast', mlflow=True)
 # Silence aggressive MLflow infrastructure warnings to keep Optuna logs pristine
@@ -67,18 +69,34 @@ def optimize_xgboost(n_trials: int = 20) -> None:
             pipeline.fit(X_train, y_train)
             
             preds_val = pipeline.predict(X_val)
-            wmape_val = wmape_metric(y_val.values, preds_val, is_holiday_val)
-            mlflow.log_metric("WMAPE_Val", wmape_val)
+            metrics = calculate_production_metrics(y_val.values, preds_val, is_holiday_val)
+            
+            # API Single-Row Inference Latency Benchmark
+            # Proving to the business our endpoints won't crash under API traffic
+            single_row = X_val.iloc[[0]]
+            start_time = time.perf_counter()
+            pipeline.predict(single_row)
+            latency_ms = (time.perf_counter() - start_time) * 1000.0
+            
+            mlflow.log_metrics({
+                "WMAPE_Val": metrics["WMAPE"],
+                "RMSE_Val": metrics["RMSE"],
+                "MAE_Val": metrics["MAE"],
+                "R2_Val": metrics["R2"],
+                "Latency_ms": latency_ms
+            })
             
             signature = infer_signature(X_val, preds_val)
             mlflow.sklearn.log_model(pipeline, "xgboost_pipeline_artifact", signature=signature)
             
-            logger.info("Trial Recorded Successfully", trial_number=trial.number, wmape=wmape_val)
-            return wmape_val
+            logger.info("Trial Recorded Successfully", trial_number=trial.number, wmape=metrics["WMAPE"])
+            return metrics["WMAPE"]
     
     logger.info("Triggering Bayesian Search", n_trials=n_trials)
     study = optuna.create_study(direction='minimize')
-    study.optimize(objective, n_trials=n_trials, n_jobs=-1) # change according to cpu cores
+    # CRITICAL: We cannot use n_jobs=-1 with a DagsHub FREE remote tracking server. 
+    # Parallelizing 8-16 processes will instantly trigger a 429 (Too Many Requests) API Rate Limit crash.
+    study.optimize(objective, n_trials=n_trials, n_jobs=1)
     
     logger.info("Optimization Grid Complete!", best_wmape=study.best_trial.value)
     logger.info("Best Final Parameters", params=study.best_trial.params)
@@ -101,6 +119,30 @@ def optimize_xgboost(n_trials: int = 20) -> None:
         df_trials = study.trials_dataframe()
         df_trials.to_csv("optuna_raw_trace.csv", index=False)
         mlflow.log_artifact("optuna_raw_trace.csv")
+
+    # 4. Formal Enterprise Model Registry Promotion
+    logger.info("Executing Formal Model Registry Promotion...")
+    client = MlflowClient()
+    experiment = client.get_experiment_by_name("StoreCast_XGBoost_Optimization")
+    
+    # Isolate the definitive winner across all 50 trials
+    runs = client.search_runs(
+        experiment_ids=[experiment.experiment_id],
+        filter_string="metrics.WMAPE_Val >= 0",
+        order_by=["metrics.WMAPE_Val ASC"],
+        max_results=1
+    )
+    
+    if runs:
+        best_run = runs[0]
+        model_uri = f"runs:/{best_run.info.run_id}/xgboost_pipeline_artifact"
+        
+        # Deploy to the formal MLOps Registry
+        reg_model = mlflow.register_model(model_uri, "StoreCast_XGBoost")
+        
+        # Tag as the reigning Champion
+        client.set_registered_model_alias("StoreCast_XGBoost", "production", reg_model.version)
+        logger.info("Model Registered and Tagged!", name="StoreCast_XGBoost", version=reg_model.version, alias="production")
     
     logger.info("Analytics complete! Check MLflow UI Artifacts.")
 if __name__ == '__main__':
