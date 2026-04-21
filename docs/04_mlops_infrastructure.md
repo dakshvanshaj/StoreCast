@@ -34,3 +34,14 @@ Every single time the code runs, it automatically logs the entire lifecycle of t
 2. **Custom Metrics:** We explicitly log our 5x-weighted `WMAPE` and `WMAE` metrics, mapping ML performance directly to the financial KPIs the business cares about.
 3. **Artifacts:** MLflow implicitly serializes and saves the actual finalized `.pkl` or `.json` model artifact using strict `infer_signature` inputs, ensuring that every deployment into a BentoML API handles Pandas missing-value arrays predictably.
 4. **The UI:** Because we mapped our URI via `dagshub.init`, viewing the dashboard doesn't require spinning up an isolated AWS EC2 host. The run histories, parameters, and fANOVA PNG plots are hosted securely in the public cloud.
+
+## 5. The Deployment Orchestrator (Multi-Objective Pareto Tie-Breaking)
+
+A junior architecture blindly extracts the single trace with the lowest WMAPE error. StoreCast utilizes **Multi-Objective Pareto Tie-Breaking** to secure absolute enterprise scale.
+
+In our decoupled `deploy_champion.py` orchestrator, our algorithm mathematically rejects single-variable decisions. The MLflow API queries the Top 10 models that successfully passed the strict `WMAPE < 8.5` mathematical boundary. We then dynamically apply a **Production Score** weighting system directly onto the traces:
+- **70% Weight:** Absolute Error (`WMAPE_Val`)
+- **20% Weight:** Terminal API Speed (`Latency_ms`) 
+- **10% Weight:** Kubernetes Ram Scale (`Model_Size_MB`)
+
+This structurally prevents a massive 90-millisecond latency model from winning just because it was 0.01% more accurate mathematically. The true Champion is unconditionally the trace that minimizes the globally unified financial production score, which is then flawlessly promoted to the `@production` registry!

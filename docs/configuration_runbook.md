@@ -29,13 +29,19 @@ uv run python baseline.py
 uv run python -m src.models.optimizer
 ```
 
-## 2c. SHAP Model Explainability
+## 2c. Enterprise Champion Deployment
+**Task**: Isolate the top candidate from the registry via multi-objective Pareto filtering, retrain seamlessly on the full unified dataset, and rigorously evaluate final latency before formally promoting the model.
+```bash
+uv run python -m src.models.deploy_champion
+```
+
+## 2d. SHAP Model Explainability
 **Task**: Rip the decision tree weights from the serverless `@production` model and generate Game-Theoretic visual analytics to `docs/images/shap/`.
 ```bash
 uv run python -m src.models.explainability
 ```
 
-## 2d. Operational Batch Inference
+## 2e. Operational Batch Inference
 **Task**: Run the live Batch Inference engine to dynamically score future data arrays, outputting the final business forecast table.
 ```bash
 uv run python -m src.models.batch_inference

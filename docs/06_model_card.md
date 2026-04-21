@@ -31,7 +31,9 @@ Instead of exhausting expensive cloud compute with an unguided GridSearch, Store
 fANOVA visual analytics proved that the `learning_rate` controlled absolute convergence momentum, while `max_depth` yielded negligible variance shifts.
 
 ## 5. Final Model Geometry & Quantitative Analysis
-Upon convergence observation (plateauing roughly at Trial 15), the MLflow ledger registered the optimal configuration resulting in a record minimum predictive error.
+Upon convergence observation, the deployment orchestrator mathematically isolated the true champion using Multi-Objective Tie-Breaking (balancing Accuracy against Latency) and logged the terminal metrics to DagsHub.
+
+![Production Champion Log](images/model_card/production_metric.png)
 
 **Operational Parameters:**
 - `n_estimators`: 610
