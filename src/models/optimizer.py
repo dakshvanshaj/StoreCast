@@ -8,6 +8,7 @@ import config_ml
 import optuna.visualization.matplotlib as vis
 import matplotlib.pyplot as plt
 import dagshub
+import pickle
 from mlflow.models.signature import infer_signature
 from models.trainer import prepare_data, calculate_production_metrics
 from models.pipeline_factory import get_model_pipeline
@@ -34,7 +35,7 @@ def optimize_xgboost(n_trials: int = 20) -> None:
     X_train, y_train, X_val, y_val, is_holiday_val, _, _, _ = prepare_data()
     
     # mlflow.set_tracking_uri("sqlite:///mlflow.db")
-    mlflow.set_experiment("StoreCast_XGBoost_Optimization")
+    mlflow.set_experiment("StoreCast_XGB_Optimization_V2")
     
     def objective(trial: optuna.Trial) -> float:
         """
@@ -78,12 +79,26 @@ def optimize_xgboost(n_trials: int = 20) -> None:
             pipeline.predict(single_row)
             latency_ms = (time.perf_counter() - start_time) * 1000.0
             
+            # Batch Throughput Benchmark (Rows Per Second)
+            # Determines how fast background cron-jobs can process millions of data points
+            start_time_batch = time.perf_counter()
+            pipeline.predict(X_val)
+            batch_duration = time.perf_counter() - start_time_batch
+            throughput_rps = len(X_val) / batch_duration
+            
+            # Model Mathematical Memory Footprint (Megabytes)
+            # Critical for Kubernetes RAM allocation cold-starts
+            
+            model_size_mb = len(pickle.dumps(pipeline)) / (1024 * 1024)
+            
             mlflow.log_metrics({
                 "WMAPE_Val": metrics["WMAPE"],
                 "RMSE_Val": metrics["RMSE"],
                 "MAE_Val": metrics["MAE"],
                 "R2_Val": metrics["R2"],
-                "Latency_ms": latency_ms
+                "Latency_ms": latency_ms,
+                "Throughput_RPS": throughput_rps,
+                "Model_Size_MB": model_size_mb
             })
             
             signature = infer_signature(X_val, preds_val)
@@ -105,45 +120,28 @@ def optimize_xgboost(n_trials: int = 20) -> None:
 
     # Create an MLflow run explicitly just to hold our Meta-Analytics!
     with mlflow.start_run(run_name="Tuning_Analytics"):
-        # 1. Feature Importance (fANOVA)
-        fig_imp = vis.plot_param_importances(study)
-        plt.tight_layout()
-        mlflow.log_figure(fig_imp.figure, "hyperparameter_importance.png")
-        
-        # 2. Optimization History
-        fig_hist = vis.plot_optimization_history(study)
-        plt.tight_layout()
-        mlflow.log_figure(fig_hist.figure, "optimization_history.png")
-        
-        # 3. Save the Raw Database Trace 
-        df_trials = study.trials_dataframe()
-        df_trials.to_csv("optuna_raw_trace.csv", index=False)
-        mlflow.log_artifact("optuna_raw_trace.csv")
+        try:
+            # 1. Feature Importance (fANOVA)
+            fig_imp = vis.plot_param_importances(study)
+            plt.tight_layout()
+            mlflow.log_figure(fig_imp.figure, "hyperparameter_importance.png")
+            
+            # 2. Optimization History
+            fig_hist = vis.plot_optimization_history(study)
+            plt.tight_layout()
+            mlflow.log_figure(fig_hist.figure, "optimization_history.png")
+        except Exception as e:
+            logger.warning("Could not generate Bayesian visual analytics. This is normal if n_trials is extremely low.", error=str(e))
+            
+        try:
+            # 3. Save the Raw Database Trace 
+            df_trials = study.trials_dataframe()
+            df_trials.to_csv("optuna_raw_trace.csv", index=False)
+            mlflow.log_artifact("optuna_raw_trace.csv")
+        except Exception as e:
+            logger.error("Failed to upload raw trace artifact.", error=str(e))
 
-    # 4. Formal Enterprise Model Registry Promotion
-    logger.info("Executing Formal Model Registry Promotion...")
-    client = MlflowClient()
-    experiment = client.get_experiment_by_name("StoreCast_XGBoost_Optimization")
-    
-    # Isolate the definitive winner across all 50 trials
-    runs = client.search_runs(
-        experiment_ids=[experiment.experiment_id],
-        filter_string="metrics.WMAPE_Val >= 0",
-        order_by=["metrics.WMAPE_Val ASC"],
-        max_results=1
-    )
-    
-    if runs:
-        best_run = runs[0]
-        model_uri = f"runs:/{best_run.info.run_id}/xgboost_pipeline_artifact"
-        
-        # Deploy to the formal MLOps Registry
-        reg_model = mlflow.register_model(model_uri, "StoreCast_XGBoost")
-        
-        # Tag as the reigning Champion
-        client.set_registered_model_alias("StoreCast_XGBoost", "production", reg_model.version)
-        logger.info("Model Registered and Tagged!", name="StoreCast_XGBoost", version=reg_model.version, alias="production")
-    
-    logger.info("Analytics complete! Check MLflow UI Artifacts.")
+    logger.info("End-to-End Optimization Grid Complete! Next step: Execute models.deploy_champion")
+
 if __name__ == '__main__':
-    optimize_xgboost(n_trials=50)
+    optimize_xgboost(n_trials=30)
