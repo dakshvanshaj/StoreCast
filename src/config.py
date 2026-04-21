@@ -25,3 +25,12 @@ SILVER_STORES_PATH = DATA_DIR / "silver" / "stores"
 GOLD_MASTER_PATH = DATA_DIR / "gold" / "master_sales_v1.parquet"
 
 GOLD_DATA_PATH = DATA_DIR / "gold" / "gold_sales.parquet"
+
+# ============ PREDICTIONS PATH ============
+PREDICTIONS_DIR = DATA_DIR / "04_predictions"
+BATCH_FORECAST_RESULTS_PATH = PREDICTIONS_DIR / "batch_forecast_results.csv"
+
+# ============ ADVANCED ANALYTICS PATH ============
+ADVANCED_ANALYTICS_DIR = DATA_DIR / "05_advanced_analytics"
+MARKET_BASKET_RULES_PATH = ADVANCED_ANALYTICS_DIR / "market_basket_rules.csv"
+ANOMALIES_PATH = ADVANCED_ANALYTICS_DIR / "high_severity_anomalies.csv"
