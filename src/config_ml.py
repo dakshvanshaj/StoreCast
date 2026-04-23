@@ -4,7 +4,7 @@ HOLIDAY_COL = 'isholiday'
 NUMERIC_FEATURES = [
     'store_size', 'temperature', 'fuel_price', 'cpi', 'unemployment', 
     'markdown1', 'markdown2', 'markdown3', 'markdown4', 'markdown5', 'total_markdown',
-    'lag_1', 'lag_5', 'lag_52', 'sales_last_year', 'rolling_4_wk_log_sales_avg', 'cpi_lag_3_month'
+    'lag_1_log', 'lag_5_log', 'lag_52_log', 'sales_last_year', 'rolling_4_wk_log_sales_avg', 'cpi_lag_3_month'
 ]
 
 # Logic: IDs and categorical states that need OHE for Linear, and Native Splitting for Trees
