@@ -77,10 +77,14 @@ def create_gold_layer():
                 SIN(2 * PI() * WEEK(date) / 52) AS sin_week,
                 COS(2 * PI() * WEEK(date) / 52) AS cos_week,
                 
-                -- 3. Point in Time Lags (Log Sales)
-                LAG(LN(weekly_sales + 1), 1) OVER w_momentum AS lag_1,
-                LAG(LN(weekly_sales + 1), 5) OVER w_momentum AS lag_5,
-                LAG(LN(weekly_sales + 1), 52) OVER w_momentum AS lag_52,
+                -- 3. Point in Time Lags (Log Space for ML Stability)
+                LAG(LN(weekly_sales + 1), 1) OVER w_momentum AS lag_1_log,
+                LAG(LN(weekly_sales + 1), 5) OVER w_momentum AS lag_5_log,
+                LAG(LN(weekly_sales + 1), 52) OVER w_momentum AS lag_52_log,
+                
+                -- 3b. Point in Time Lags (Raw Dollars for BI Dashboards & Operations)
+                LAG(weekly_sales, 1) OVER w_momentum AS lag_1_sales,
+                LAG(weekly_sales, 5) OVER w_momentum AS lag_5_sales,
                 LAG(weekly_sales, 52) OVER w_momentum AS sales_last_year,
                 
                 -- 4. Rolling Momentum (Shifted 1 to prevent leakage)
@@ -89,6 +93,13 @@ def create_gold_layer():
                     ORDER BY date 
                     ROWS BETWEEN 4 PRECEDING AND 1 PRECEDING
                 ) AS rolling_4_wk_log_sales_avg,
+                
+                -- 4b. Rolling Momentum (Raw Dollars for Operations)
+                AVG(weekly_sales) OVER (
+                    PARTITION BY store, dept 
+                    ORDER BY date 
+                    ROWS BETWEEN 4 PRECEDING AND 1 PRECEDING
+                ) AS rolling_4_wk_sales_avg,
                 
                 -- 5. Macroeconomic CPI lag (3 months ~ 12 weeks)
                 LAG(cpi, 12) OVER (
