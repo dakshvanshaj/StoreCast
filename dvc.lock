@@ -46,11 +46,11 @@ stages:
       nfiles: 6
     - path: src/data/create_gold.py
       hash: md5
-      md5: f1104ac42ea8ba6d99ca65aed01156f9
-      size: 4894
+      md5: 1892302a7acc4ff0f5455ff9f82dd2fc
+      size: 5479
     outs:
     - path: data/gold
       hash: md5
-      md5: c3b929c863f7d4efa815be0f77f95151.dir
-      size: 20725447
+      md5: 0adbf653fd281200cb266466ef80b509.dir
+      size: 28325258
       nfiles: 1
