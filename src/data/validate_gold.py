@@ -119,7 +119,8 @@ def rules_master_sales(suite):
     # 16. Check for data quality in store type (should be one of the expected values)
     suite.add_expectation(gx.expectations.ExpectColumnValuesToBeInSet(column="store_type", value_set=["A", "B", "C"]))
 
-    # 17. Check for data quality in isholiday (should be 0 or 1)
+    # 17. Check for data quality in isholiday (should be 0 or 1, and never NULL)
+    suite.add_expectation(gx.expectations.ExpectColumnValuesToNotBeNull(column="isholiday"))
     suite.add_expectation(gx.expectations.ExpectColumnValuesToBeInSet(column="isholiday", value_set=[0, 1]))
 
    
