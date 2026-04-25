@@ -44,7 +44,7 @@ def create_gold_layer():
                 SELECT 
                     s.store, s.dept, s.date,
                     COALESCE(sales.weekly_sales, 0.0) AS weekly_sales,
-                    sales.isholiday,
+                    COALESCE(sales.isholiday, f.isholiday, 0) AS isholiday,
                     st.type as store_type,
                     st.size as store_size,
                     f.temperature,
