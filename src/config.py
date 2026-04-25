@@ -26,6 +26,12 @@ GOLD_MASTER_PATH = DATA_DIR / "gold" / "master_sales_v1.parquet"
 
 GOLD_DATA_PATH = DATA_DIR / "gold" / "gold_sales.parquet"
 
+# ============ STATIC ML FEATURE STORE ============
+ML_DATA_DIR = DATA_DIR / "ml_data"
+TRAIN_DATA_PATH = ML_DATA_DIR / "train.parquet"
+VAL_DATA_PATH = ML_DATA_DIR / "val.parquet"
+TEST_DATA_PATH = ML_DATA_DIR / "test.parquet"
+
 # ============ PREDICTIONS PATH ============
 PREDICTIONS_DIR = DATA_DIR / "04_predictions"
 BATCH_FORECAST_RESULTS_PATH = PREDICTIONS_DIR / "batch_forecast_results.csv"
