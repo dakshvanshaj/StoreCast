@@ -28,12 +28,30 @@ def execute_contextual_anomaly_hunting() -> None:
     # (Adding +1 to denominator prevents divide-by-zero crashes on zero-sales closed weeks).
     lf = lf.with_columns([
         (pl.col('weekly_sales') / (pl.col('sales_last_year') + 1)).alias('yoy_growth_ratio'),
-        (pl.col('weekly_sales') / (pl.col('rolling_4_wk_sales_avg') + 1)).alias('trend_deviation_ratio')
+        (pl.col('weekly_sales') / (pl.col('rolling_4_wk_sales_avg') + 1)).alias('trend_deviation_ratio'),
+        (pl.col('total_markdown') / (pl.col('weekly_sales') + 1)).alias('markdown_intensity_ratio')
+    ])
+    
+    # Engineer the Advanced Decoupling Ratios
+    lf = lf.with_columns([
+        (pl.col('markdown_intensity_ratio') / (pl.col('yoy_growth_ratio') + 0.01)).alias('markdown_cannibalization'),
+        (pl.col('weekly_sales') / (pl.col('store_size'))).alias('footprint_yield'),
+        pl.when(pl.col('isholiday') == 1)
+          .then(pl.col('trend_deviation_ratio'))
+          .otherwise(pl.lit(1.0))
+          .alias('holiday_miss_severity')
     ])
     
     # Contextual Isolation
-    # We feed it the dimensionless RATIOS!
-    features = ['yoy_growth_ratio', 'trend_deviation_ratio', 'total_markdown']
+    # We feed it the completely dimensionless RATIOS!
+    features = [
+        'yoy_growth_ratio', 
+        'trend_deviation_ratio', 
+        'markdown_intensity_ratio',
+        'markdown_cannibalization',
+        'footprint_yield',
+        'holiday_miss_severity'
+    ]
     
     logger.info("Extracting Contextual Feature Matrix (Ratios)...", features=features)
     
@@ -42,8 +60,8 @@ def execute_contextual_anomaly_hunting() -> None:
     X_train = lf.select(features).fill_null(0).collect().to_pandas()
     
     logger.info("Training Isolation Forest to hunt dimensional decoupling...", rows=len(X_train))
-    # contamination=0.01 means we mandate the algorithm isolates the most extreme 1% of the database
-    iso_forest = IsolationForest(contamination=0.01, random_state=42, n_jobs=-1)
+    # contamination=0.005 means we mandate the algorithm isolates the most extreme 0.5% of the database
+    iso_forest = IsolationForest(contamination=0.005, random_state=42, n_jobs=-1)
     
     # Train and Score
     anomaly_predictions = iso_forest.fit_predict(X_train)
@@ -61,7 +79,9 @@ def execute_contextual_anomaly_hunting() -> None:
     business_view = anomalies.select([
         'store', 'dept', 'date', 'isholiday', 'weekly_sales', 
         'sales_last_year', 'rolling_4_wk_sales_avg', 
-        'yoy_growth_ratio', 'trend_deviation_ratio', 'total_markdown'
+        'yoy_growth_ratio', 'trend_deviation_ratio', 'total_markdown',
+        'markdown_intensity_ratio', 'markdown_cannibalization', 
+        'footprint_yield', 'holiday_miss_severity'
     ])
     
     # Push to Advanced Analytics Storage using Global Configuration
