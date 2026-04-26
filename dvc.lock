@@ -15,7 +15,7 @@ stages:
     outs:
     - path: data/bronze
       hash: md5
-      md5: 794b439ae4603110e30271b8afe2e749.dir
+      md5: dd20da83d277baf149d8b4277234868e.dir
       size: 2745881
       nfiles: 112
   create_silver:
@@ -23,7 +23,7 @@ stages:
     deps:
     - path: data/bronze
       hash: md5
-      md5: 794b439ae4603110e30271b8afe2e749.dir
+      md5: dd20da83d277baf149d8b4277234868e.dir
       size: 2745881
       nfiles: 112
     - path: src/data/clean_silver.py
@@ -33,16 +33,16 @@ stages:
     outs:
     - path: data/silver
       hash: md5
-      md5: 5be3b6892797f214363d9bbd2d93e13f.dir
-      size: 3525683
+      md5: 9b2e3972947d3a2ffd65828aebe76684.dir
+      size: 3525632
       nfiles: 6
   create_gold:
     cmd: uv run python -m src.data.create_gold
     deps:
     - path: data/silver
       hash: md5
-      md5: 5be3b6892797f214363d9bbd2d93e13f.dir
-      size: 3525683
+      md5: 9b2e3972947d3a2ffd65828aebe76684.dir
+      size: 3525632
       nfiles: 6
     - path: src/data/create_gold.py
       hash: md5
@@ -51,16 +51,16 @@ stages:
     outs:
     - path: data/gold
       hash: md5
-      md5: 6e4507f8111ac130f724d2029c503503.dir
-      size: 23615494
+      md5: 2d534364dd0c487d74f9687294a5db62.dir
+      size: 23615276
       nfiles: 1
   create_ml_data:
     cmd: uv run python -m src.data.chronological_split
     deps:
     - path: data/gold
       hash: md5
-      md5: 6e4507f8111ac130f724d2029c503503.dir
-      size: 23615494
+      md5: 2d534364dd0c487d74f9687294a5db62.dir
+      size: 23615276
       nfiles: 1
     - path: src/data/chronological_split.py
       hash: md5
@@ -69,6 +69,6 @@ stages:
     outs:
     - path: data/ml_data
       hash: md5
-      md5: 39c076c16b11c97d4cf64afd953d47bf.dir
-      size: 23201441
+      md5: 523a723523cb6b29e598e5ad3781fd8d.dir
+      size: 23201287
       nfiles: 3
