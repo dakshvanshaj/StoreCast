@@ -1,7 +1,9 @@
 import duckdb
 import polars as pl
 import structlog 
-import config 
+from src.utils.config_manager import ConfigManager
+import os
+from pathlib import Path 
 import time
 
 logger = structlog.get_logger()
@@ -17,9 +19,12 @@ def create_gold_layer():
         logger.info('Loading DuckDB Delta Extension', layer='gold')
         con.execute("INSTALL delta; LOAD delta;")
         
+        cfg = ConfigManager()
+        project_root = Path(__file__).parent.parent.parent.resolve()
+        
         logger.info('Enabling DuckDB JSON Profiling', layer='gold')
         con.execute("PRAGMA enable_profiling='json';")
-        con.execute(f"PRAGMA profile_output='{config.PROJECT_ROOT}/duckdb_profile.json';")
+        con.execute(f"PRAGMA profile_output='{project_root}/duckdb_profile.json';")
         
         logger.info('Executing Joins And Feature Engineering SQL Query using DuckDB', layer='gold', query_type='window_functions')
 
@@ -27,13 +32,13 @@ def create_gold_layer():
             CREATE OR REPLACE TABLE gold_master AS 
             WITH calendar AS (
                 SELECT UNNEST(GENERATE_SERIES(
-                    (SELECT MIN(date) FROM delta_scan('{config.SILVER_SALES_PATH}')), 
-                    (SELECT MAX(date) FROM delta_scan('{config.SILVER_SALES_PATH}')), 
+                    (SELECT MIN(date) FROM delta_scan('{cfg.get("data.paths.silver_sales")}')), 
+                    (SELECT MAX(date) FROM delta_scan('{cfg.get("data.paths.silver_sales")}')), 
                     INTERVAL 7 DAYS
                 )) AS date
             ),
             unique_stores AS (
-                SELECT DISTINCT store, dept FROM delta_scan('{config.SILVER_SALES_PATH}')
+                SELECT DISTINCT store, dept FROM delta_scan('{cfg.get("data.paths.silver_sales")}')
             ),
             scaffold AS (
                 SELECT u.store, u.dept, c.date
@@ -58,11 +63,11 @@ def create_gold_layer():
                     f.markdown5,
                     (COALESCE(f.markdown1, 0) + COALESCE(f.markdown2, 0) + COALESCE(f.markdown3, 0) + COALESCE(f.markdown4, 0) + COALESCE(f.markdown5, 0)) as total_markdown
                 FROM scaffold s
-                LEFT JOIN delta_scan('{config.SILVER_SALES_PATH}') sales 
+                LEFT JOIN delta_scan('{cfg.get("data.paths.silver_sales")}') sales 
                     ON s.store = sales.store AND s.dept = sales.dept AND s.date = sales.date
-                LEFT JOIN delta_scan('{config.SILVER_FEATURES_PATH}') f
+                LEFT JOIN delta_scan('{cfg.get("data.paths.silver_features")}') f
                     ON s.store = f.store AND s.date = f.date
-                LEFT JOIN delta_scan('{config.SILVER_STORES_PATH}') st
+                LEFT JOIN delta_scan('{cfg.get("data.paths.silver_stores")}') st
                     ON s.store = st.store
             )
             SELECT 
@@ -114,9 +119,25 @@ def create_gold_layer():
 
         con.execute(gold_sql)
 
-        logger.info('Exporting gold table to parquet', layer='gold')
-        config.GOLD_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
-        con.execute(f"COPY gold_master TO '{config.GOLD_DATA_PATH}' (FORMAT PARQUET)")
+        logger.info('Extracting into Polars for final storage optimization...', layer='gold')
+        lf = pl.from_arrow(con.execute("SELECT * FROM gold_master").arrow())
+        
+        # Optimize Storage Types
+        import polars.selectors as cs
+
+        
+        # 1. Cast Integers to Floats: ML frameworks (MLflow, BentoML) crash if they encounter 
+        # missing values inside integer columns during inference. Floats handle NaNs natively.
+        lf = lf.with_columns(cs.integer().cast(pl.Float64))
+        
+        # 2. Dictionary Encoding (Categoricals): Saves ~70% disk space and RAM.
+        for col in cfg.get("data.features.categorical"):
+            lf = lf.with_columns(pl.col(col).cast(pl.String).cast(pl.Categorical))
+        
+        gold_path = Path(cfg.get("data.paths.gold_data"))
+        logger.info('Writing heavily optimized Parquet', path=str(gold_path))
+        gold_path.parent.mkdir(parents=True, exist_ok=True)
+        lf.write_parquet(str(gold_path))
      
         logger.info('Closing DuckDB connection', layer='gold')
         con.close()

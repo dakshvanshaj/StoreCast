@@ -2,7 +2,7 @@ import great_expectations as gx
 import polars as pl 
 import pandas as pd
 import structlog 
-import config 
+from src.utils.config_manager import ConfigManager
 import shutil 
 import time
 from pathlib import Path
@@ -124,12 +124,15 @@ def validate():
     start_time = time.time()
     logger.info('Great Expectations Validation Started')
 
+    cfg = ConfigManager()
+    project_root = Path(__file__).parent.parent.parent.resolve()
+    
     logger.info('Reading Silver Data', dataset='sales')
-    sales_df = pl.read_delta(str(config.SILVER_SALES_PATH)).to_pandas()
+    sales_df = pl.read_delta(cfg.get("data.paths.silver_sales")).to_pandas()
     logger.info('Reading Silver Data', dataset='features')
-    features_df = pl.read_delta(str(config.SILVER_FEATURES_PATH)).to_pandas()
+    features_df = pl.read_delta(cfg.get("data.paths.silver_features")).to_pandas()
     logger.info('Reading Silver Data', dataset='stores')
-    stores_df = pl.read_delta(str(config.SILVER_STORES_PATH)).to_pandas()
+    stores_df = pl.read_delta(cfg.get("data.paths.silver_stores")).to_pandas()
 
     logger.info('Initializing GX Context', mode='ephemeral')
     context = gx.get_context(mode='ephemeral')
@@ -161,7 +164,7 @@ def validate():
     
     if tmp_path_str:
         tmp_dir = Path(tmp_path_str).parent
-        target_dir = config.PROJECT_ROOT / "docs" / "gx_data_docs_silver"
+        target_dir = project_root / "docs" / "gx_data_docs_silver"
         
         if tmp_dir.exists():
             if target_dir.exists():

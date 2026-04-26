@@ -1,11 +1,12 @@
 import pandas as pd 
 import numpy as np
-import config   
+from src.utils.config_manager import ConfigManager
 
+cfg = ConfigManager()
 
-raw_store_sales = pd.read_csv(config.RAW_SALES_PATH)
-raw_store_features = pd.read_csv(config.RAW_FEATURES_PATH)
-raw_stores = pd.read_csv(config.RAW_STORES_PATH)
+raw_store_sales = pd.read_csv(cfg.get("data.paths.raw_sales"))
+raw_store_features = pd.read_csv(cfg.get("data.paths.raw_features"))
+raw_stores = pd.read_csv(cfg.get("data.paths.raw_stores"))
 
 
 # the date is in day/month/year format i.e d/m/Y

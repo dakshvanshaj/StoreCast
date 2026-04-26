@@ -1,7 +1,7 @@
 import polars as pl 
-import config 
 import time
 from structlog import getLogger 
+from src.utils.config_manager import ConfigManager
 
 logger = getLogger()
 
@@ -9,11 +9,12 @@ def create_silver_layer() -> None:
     try:
         start_time = time.time()
         logger.info("Starting silver layer transformation", layer="silver")
+        cfg = ConfigManager()
 
         logger.info("Reading bronze data via Lazy Evaluation (scan_delta)", source="bronze")
-        sales_lf = pl.scan_delta(str(config.BRONZE_SALES_PATH))
-        features_lf = pl.scan_delta(str(config.BRONZE_FEATURES_PATH))
-        stores_lf = pl.scan_delta(str(config.BRONZE_STORES_PATH))
+        sales_lf = pl.scan_delta(cfg.get("data.paths.bronze_sales"))
+        features_lf = pl.scan_delta(cfg.get("data.paths.bronze_features"))
+        stores_lf = pl.scan_delta(cfg.get("data.paths.bronze_stores"))
 
         logger.info("Standardizing column names", dataset="sales")
         sales_lf = sales_lf.rename({col: col.strip().lower().replace(" ", "_") for col in sales_lf.collect_schema().names()})
@@ -49,13 +50,13 @@ def create_silver_layer() -> None:
 
         # Execute Graph & Write to Silver 
         logger.info("Evaluating Lazy Graph to physical Silver Delta layer", dataset="sales")
-        sales_lf.collect(engine='streaming').write_delta(str(config.SILVER_SALES_PATH), mode="overwrite")
+        sales_lf.collect(engine='streaming').write_delta(cfg.get("data.paths.silver_sales"), mode="overwrite")
         
         logger.info("Evaluating Lazy Graph to physical Silver Delta layer", dataset="features")
-        features_lf.collect(engine='streaming').write_delta(str(config.SILVER_FEATURES_PATH), mode="overwrite")
+        features_lf.collect(engine='streaming').write_delta(cfg.get("data.paths.silver_features"), mode="overwrite")
         
         logger.info("Evaluating Lazy Graph to physical Silver Delta layer", dataset="stores")
-        stores_lf.collect(engine='streaming').write_delta(str(config.SILVER_STORES_PATH), mode="overwrite")
+        stores_lf.collect(engine='streaming').write_delta(cfg.get("data.paths.silver_stores"), mode="overwrite")
 
         duration = round(time.time() - start_time, 2) 
         logger.info("Silver layer lazy execution completed", status="success", duration_seconds=duration)

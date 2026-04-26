@@ -1,7 +1,7 @@
 import great_expectations as gx 
 import pandas as pd
 import structlog 
-import config 
+from src.utils.config_manager import ConfigManager
 import shutil 
 import time
 from pathlib import Path
@@ -131,8 +131,11 @@ def validate():
     start_time = time.time()
     logger.info('Great Expectations Validation Started')
 
+    cfg = ConfigManager()
+    project_root = Path(__file__).parent.parent.parent.resolve()
+    
     logger.info('Reading Gold Data', dataset='master_sales')
-    master_sales_df = pd.read_parquet(config.GOLD_MASTER_PATH)
+    master_sales_df = pd.read_parquet(cfg.get("data.paths.gold_data"))
     
     logger.info('Initializing GX Context', mode='ephemeral')
     context = gx.get_context(mode='ephemeral')
@@ -160,7 +163,7 @@ def validate():
     
     if tmp_path_str:
         tmp_dir = Path(tmp_path_str).parent
-        target_dir = config.PROJECT_ROOT / "docs" / "gx_data_docs_gold"
+        target_dir = project_root / "docs" / "gx_data_docs_gold"
         
         if tmp_dir.exists():
             if target_dir.exists():
