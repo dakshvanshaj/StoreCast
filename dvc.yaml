@@ -20,3 +20,11 @@ stages:
     - src/data/create_gold.py
     outs:
     - data/gold
+  create_ml_data:
+    cmd: uv run python -m src.data.chronological_split
+    deps:
+    - data/gold
+    - src/data/chronological_split.py
+    outs:
+    - data/ml_data
+

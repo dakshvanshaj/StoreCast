@@ -10,12 +10,12 @@ stages:
       nfiles: 3
     - path: src/data/ingest_bronze.py
       hash: md5
-      md5: c4d0ad97734651bb55eaf2fe68d29882
-      size: 1809
+      md5: c8ca3cb985da4cd5ae745b4ecb24d5c7
+      size: 1900
     outs:
     - path: data/bronze
       hash: md5
-      md5: a5087113b173552d1211bbd4e08b1932.dir
+      md5: 794b439ae4603110e30271b8afe2e749.dir
       size: 2745881
       nfiles: 112
   create_silver:
@@ -23,34 +23,52 @@ stages:
     deps:
     - path: data/bronze
       hash: md5
-      md5: a5087113b173552d1211bbd4e08b1932.dir
+      md5: 794b439ae4603110e30271b8afe2e749.dir
       size: 2745881
       nfiles: 112
     - path: src/data/clean_silver.py
       hash: md5
-      md5: 98637e37ea5086c9f8339253eeb12cdd
-      size: 3555
+      md5: e43f512fad047d75083780f3a59d9ae3
+      size: 3651
     outs:
     - path: data/silver
       hash: md5
-      md5: cb0d204a42e82679b3f87f51f1a7e0aa.dir
-      size: 3525836
+      md5: 5be3b6892797f214363d9bbd2d93e13f.dir
+      size: 3525683
       nfiles: 6
   create_gold:
     cmd: uv run python -m src.data.create_gold
     deps:
     - path: data/silver
       hash: md5
-      md5: cb0d204a42e82679b3f87f51f1a7e0aa.dir
-      size: 3525836
+      md5: 5be3b6892797f214363d9bbd2d93e13f.dir
+      size: 3525683
       nfiles: 6
     - path: src/data/create_gold.py
       hash: md5
-      md5: 0e4a66cd9896df93fe2d2a8ed01bbcda
-      size: 5518
+      md5: 0a94a9f31453039e7feef2dafce50317
+      size: 6509
     outs:
     - path: data/gold
       hash: md5
-      md5: 699acefb4c4f21affc5672c1a0eac642.dir
-      size: 28282394
+      md5: 6e4507f8111ac130f724d2029c503503.dir
+      size: 23615494
       nfiles: 1
+  create_ml_data:
+    cmd: uv run python -m src.data.chronological_split
+    deps:
+    - path: data/gold
+      hash: md5
+      md5: 6e4507f8111ac130f724d2029c503503.dir
+      size: 23615494
+      nfiles: 1
+    - path: src/data/chronological_split.py
+      hash: md5
+      md5: 143e65b543fb4b984952c6621bdf9d81
+      size: 4701
+    outs:
+    - path: data/ml_data
+      hash: md5
+      md5: 39c076c16b11c97d4cf64afd953d47bf.dir
+      size: 23201441
+      nfiles: 3
