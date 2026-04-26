@@ -1,0 +1,79 @@
+# config/params.yaml
+project:
+  name: "StoreCast"
+  tracking_repo: "dakshvanshaj/StoreCast"
+
+data:
+  paths:
+    raw_sales: "data/raw/sales.csv"
+    raw_features: "data/raw/features.csv"
+    raw_stores: "data/raw/stores.csv"
+    bronze_sales: "data/bronze/sales"
+    bronze_features: "data/bronze/features"
+    bronze_stores: "data/bronze/stores"
+    silver_sales: "data/silver/sales"
+    silver_features: "data/silver/features"
+    silver_stores: "data/silver/stores"
+    gold_master: "data/gold/master_sales_v1.parquet"
+    gold_data: "data/gold/gold_sales.parquet"
+    ml_train: "data/ml_data/train.parquet"
+    ml_val: "data/ml_data/val.parquet"
+    ml_test: "data/ml_data/test.parquet"
+    predictions_export: "data/predictions/batch_forecast_results.csv"
+    market_basket_export: "data/advanced_analytics/market_basket_rules.csv"
+    anomalies_export: "data/advanced_analytics/high_severity_anomalies.csv"
+    store_clusters_export: "data/advanced_analytics/store_clusters.csv"
+
+  splits:
+    train_quantile: 0.70
+    val_quantile: 0.85
+
+  columns:
+    target: "weekly_sales"
+    holiday: "isholiday"
+
+  features:
+    numeric:
+      - "store_size"
+      - "temperature"
+      - "fuel_price"
+      - "cpi"
+      - "unemployment"
+      - "markdown1"
+      - "markdown2"
+      - "markdown3"
+      - "markdown4"
+      - "markdown5"
+      - "total_markdown"
+      - "lag_1_log"
+      - "lag_5_log"
+      - "lag_52_log"
+      - "sales_last_year"
+      - "rolling_4_wk_log_sales_avg"
+      - "cpi_lag_3_month"
+    categorical:
+      - "store"
+      - "dept"
+      - "store_type"
+      - "isholiday"
+      - "month"
+      - "week_of_year"
+    passthrough:
+      - "sin_week"
+      - "cos_week"
+
+training:
+  xgboost:
+    n_trials_optuna: 30
+    opt_experiment_name: "StoreCast_XGB_Optimization_V2"
+    deploy_experiment_name: "StoreCast_Production_Deployments"
+    fixed_params:
+      n_estimators: 500
+      random_state: 42
+      enable_categorical: true
+
+deployment:
+  quality_gates:
+    max_wmape: 8.5
+    min_r2: 0.95
+    max_latency_ms: 25.0
