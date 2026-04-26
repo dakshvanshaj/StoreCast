@@ -1,14 +1,33 @@
 .env
 __pycache__
-/data 
 /images/data_architecture
 .venv
 
 *.egg-info
+.cache
 
-# Guide.pdf
-# idea.md
-# steps.md
-# thoughts.md
-# implementation_plan.md
-# doing.md
+Guide.pdf
+idea.md
+steps.md
+thoughts.md
+implementation_plan.md
+doing.md
+GEMINI.md
+.vscode/settings.json
+
+gx_data_docs_*
+site
+
+mlruns
+mlflow.db
+optuna_raw_trace.csv
+duckdb_profile.json
+docs/05_debugging_war_stories.md
+data/04_predictions/batch_forecast_results.csv
+workspace/
+data/ml_data/
+.coverage
+myself.txt
+.gitignore
+linkedin.md
+duckdb_profile.json
