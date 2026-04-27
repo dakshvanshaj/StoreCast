@@ -81,20 +81,19 @@ def get_model_pipeline(
         model_params = {}
 
     if model_type == 'XGBoost':
-        regressor = xgb.XGBRegressor(random_state=42,
-        enable_categorical=True, **model_params)
+        regressor = xgb.XGBRegressor(**model_params)
 
     elif model_type == 'LightGBM':
-        regressor = lgb.LGBMRegressor(random_state=42, verbose=-1, **model_params) 
+        regressor = lgb.LGBMRegressor(verbose=-1, **model_params) 
 
     elif model_type == 'CatBoost':
-        regressor = cb.CatBoostRegressor(random_state=42, verbose=-1, **model_params) 
+        regressor = cb.CatBoostRegressor(verbose=-1, **model_params) 
     
     elif model_type == 'RandomForest':
-        regressor = RandomForestRegressor(random_state=42, **model_params) 
+        regressor = RandomForestRegressor(**model_params) 
 
     elif model_type == 'LinearRegression':
-        regressor = Ridge(random_state=42, **model_params) 
+        regressor = Ridge(**model_params) 
 
     else:
         logger.error("Failed to parse model type!", requested_model=model_type)
