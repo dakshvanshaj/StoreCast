@@ -1,51 +1,62 @@
-import polars as pl
-import pandas as pd
-import numpy as np 
-from src.utils.config_manager import ConfigManager
+import structlog
+import warnings
 from typing import Dict, Any, Tuple
 from sklearn.pipeline import Pipeline
-import structlog 
+
+from src.utils.config_manager import ConfigManager
 from src.data.chronological_split import load_ml_splits
 from src.training.metrics import calculate_production_metrics
-
 from src.training.pipeline_factory import get_model_pipeline
 
 logger = structlog.get_logger()
 
-def train_model(model_type: str, params: Dict[str, Any]) -> Tuple[Pipeline, Dict[str, float]]:
+class BaselineTrainer:
     """
-    Train a machine learning model pipeline and calculate the WMAPE on the test set.
-
-    Args:
-        model_type (str): The name of the regression algorithm to initialize.
-        params (Dict[str, Any]): Hyperparameters for the model.
-
-    Returns:
-        Tuple[Pipeline, Dict[str, float]]: The fitted model pipeline and a dictionary of evaluation metrics.
+    Trains and evaluates standalone models outside of the optimization loop. 
+    Useful for establishing baselines or running one-off training jobs.
     """
-    X_train, y_train, X_val, y_val, is_holiday_val, X_test, y_test, is_holiday_test = load_ml_splits()
-    
-    cfg = ConfigManager()
-    logger.info("Training Model Pipeline", model_type=model_type, params=params)
-    pipeline = get_model_pipeline(
-        model_type, 
-        cfg.get("data.features.numeric"), 
-        cfg.get("data.features.categorical"), 
-        params
-    )
-    pipeline.fit(X_train, y_train)
-    
-    preds = pipeline.predict(X_test)
-    metrics = calculate_production_metrics(y_test.values, preds, is_holiday_test)
+    def __init__(self, cfg: ConfigManager):
+        self.cfg = cfg
+        self.numeric_features = self.cfg.get("data.features.numeric")
+        self.categorical_features = self.cfg.get("data.features.categorical")
+        
+        logger.info("Loading baseline data splits into memory...")
+        self.X_train, self.y_train, self.X_val, self.y_val, self.is_holiday_val, self.X_test, self.y_test, self.is_holiday_test = load_ml_splits()
 
-    return pipeline, metrics
-
+    def train(self, model_type: str, params: Dict[str, Any] = None) -> Tuple[Pipeline, Dict[str, float]]:
+        """
+        Trains a specified model type and evaluates it on the test set.
+        """
+        if params is None:
+            params = {}
+            
+        logger.info("Training Model Pipeline", model_type=model_type)
+        
+        pipeline = get_model_pipeline(
+            model_type, 
+            self.numeric_features, 
+            self.categorical_features, 
+            params
+        )
+        
+        pipeline.fit(self.X_train, self.y_train)
+        
+        logger.info("Evaluating on Unseen Test Set...")
+        preds = pipeline.predict(self.X_test)
+        metrics = calculate_production_metrics(self.y_test.values, preds, self.is_holiday_test)
+        
+        return pipeline, metrics
 
 if __name__ == '__main__':
-    cfg = ConfigManager()
-    _, metrics = train_model("LinearRegression", {})
-    print(f"LinearRegression Pipeline WMAPE: {metrics['WMAPE']}")
-
-    _, metrics = train_model("XGBoost", cfg.get("training.xgboost.fixed_params"))
-    print(f"XGBoost Pipeline WMAPE: {metrics['WMAPE']}")
+    # Initialize the YAML config
+    cfg = ConfigManager("config/params.yaml")
+    trainer = BaselineTrainer(cfg)
     
+    # 1. Train a simple Linear Regression Baseline
+    _, lr_metrics = trainer.train("LinearRegression", {})
+    logger.info("Linear Regression Baseline", wmape=lr_metrics['WMAPE'])
+    
+    # 2. Train the XGBoost Default Model
+    xgb_params = cfg.get("training.xgboost.fixed_params", {})
+    _, xgb_metrics = trainer.train("XGBoost", xgb_params)
+    logger.info("XGBoost Default Result", wmape=xgb_metrics['WMAPE'])
