@@ -3,31 +3,47 @@ site_author: "Daksh Vanshaj"
 logo: images/logo.png
 nav:
   - Home: index.md
+  - Project Roadmap: roadmap.md
   - Business Context: 
       - Report: 01_business_context.md
       - Business Metrics: 01a_business_metrics_math.md
-      - Baseline Model: ./notebooks_docs/01_baseline.ipynb
-  - Data Pipelines:
-      - Bronze Ingestion: scripts_docs/ingest_bronze_doc.md
-      - Silver Transformation: scripts_docs/clean_silver_doc.md
   - Data Architecture:
       - Tech Stack & Tradeoffs: 02_architecture_tradeoffs.md
       - Medallion Complete Diagram: 03_medallion_architecture.md
       - MLOps Infrastructure: 04_mlops_infrastructure.md
+  - Data Pipelines:
+      - Bronze Ingestion: scripts_docs/ingest_bronze_doc.md
+      - Silver Transformation: scripts_docs/clean_silver_doc.md
+      - Gold Aggregation: scripts_docs/create_gold_doc.md
+      - Data Contracts: data_contract.md
+      - Configuration Runbook: configuration_runbook.md
+  - MLOps & Observability:
+      - Debugging War Stories: 05_debugging_war_stories.md
+      - Model Card: 06_model_card.md
+      - Forecasting Horizon: 07_forecasting_horizon.md
+      - Model Explainability: 08_model_explainability.md
+      - Batch Inference Architecture: 09_batch_inference_architecture.md
+      - MLOps Testing Strategy: 13_mlops_testing_strategy.md
+      - Manual Flow vs Automation: manual_flow.md
+  - Advanced Analytics:
+      - Anomaly Detection: 10_anomaly_detection.md
+      - Market Basket Analysis: 11_market_basket_analysis.md
+      - Store Clustering: 12_store_clustering.md
   - Data Science & ML EDA:
-      - 01 Baseline Model: ./notebooks_docs/01_baseline.ipynb
-      - 02 Feasibility Study: ./notebooks_docs/02_feasibility_study.ipynb
-      - 03 Data Quality Profiling: ./notebooks_docs/03_data_quality_profiling.ipynb
-      - 04 Time Series EDA & Ghost Gaps: ./notebooks_docs/04_time_series_analysis.ipynb
-      - 05 TS Variance Stabilization & Normalization: ./notebooks_docs/05_time_series_analysis.ipynb
-      - 06 TS Decomposition, ACF & PACF: ./notebooks_docs/06_time_series_analysis.ipynb
-      - 07 Exogenous Sales Drivers: ./notebooks_docs/07_eda_sales_drivers.ipynb
-      - 08 ML Transformations: ./notebooks_docs/08_ml_eda_and_transformations.ipynb
-      - 09 TSA Feature Engineering: ./notebooks_docs/09_tsa_feature_engineering.ipynb
+      - 01 Bronze Ingestion: ./notebooks_docs/ingest_bronze.ipynb
+      - 02 Baseline Model: ./notebooks_docs/01_baseline.ipynb
+      - 03 Feasibility Study: ./notebooks_docs/02_feasibility_study.ipynb
+      - 04 Data Quality Profiling: ./notebooks_docs/03_data_quality_profiling.ipynb
+      - 05 Time Series EDA & Ghost Gaps: ./notebooks_docs/04_time_series_analysis.ipynb
+      - 06 TS Variance Stabilization & Normalization: ./notebooks_docs/05_time_series_analysis.ipynb
+      - 07 TS Decomposition, ACF & PACF: ./notebooks_docs/06_time_series_analysis.ipynb
+      - 08 Exogenous Sales Drivers: ./notebooks_docs/07_eda_sales_drivers.ipynb
+      - 09 ML Transformations: ./notebooks_docs/08_ml_eda_and_transformations.ipynb
+      - 10 TSA Feature Engineering: ./notebooks_docs/09_tsa_feature_engineering.ipynb
+      - 11 Feature Eng SQL: ./notebooks_docs/10_feature_eng_sql.ipynb
   - Feasibility Study:
       - Feasibility Report: feasibility_report.md
-      - Baseline Feasibility Study: ./notebooks_docs/04_feasibility_study.ipynb
-      
+
 
 theme:
   name: material
@@ -50,16 +66,17 @@ theme:
     repo: fontawesome/brands/github
   features:
     - navigation.tabs
-    - navigation.instant
+    # - navigation.instant
 
 plugins:
   - search
   - mkdocs-jupyter
   - mermaid2
 
-repo_url: https://github.com/dakshvanshaj/storecast
+repo_url: https://github.com/dakshvanshaj/StoreCast
 repo_name: StoreCast
-
+docs_dir: docs
+site_dir: site
 extra:
   social:
     - icon: fontawesome/solid/envelope

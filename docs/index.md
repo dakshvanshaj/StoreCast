@@ -60,7 +60,7 @@ graph TD
     end
 
     subgraph Impact["3. Executive Dashboards"]
-        K --> N[Streamlit App<br>GenAI RAG Chatbot]:::bi
+        K --> N[Streamlit App<br>Business & MLOps OS]:::bi
         L --> N
         
         N -->|Preserve Gross Margin| G(Save $5.5M):::roi
@@ -73,6 +73,14 @@ graph TD
     YAML -.-> DataEngineering
     YAML -.-> MLOps
 ```
+
+## 💡 Advanced Analytics Impact
+
+Beyond pure demand forecasting, StoreCast deploys unsupervised machine learning algorithms to drive immediate operational intelligence:
+
+1.  **Context-Aware Anomaly Detection (Isolation Forests):** Defeated the "Volume Trap" by mathematically compressing absolute sales into Dimensionless Ratios (`yoy_growth_ratio`, `trend_deviation`). This allows the system to flag true operational decoupling (e.g., a catastrophic drop in a localized department) rather than just highlighting naturally large supercenters.
+2.  **Market Basket Analysis (Pearson Correlation):** By computing de-seasonalized correlations against model residuals (Actual Sales vs. Expected Sales), we stripped away holiday bias to discover true department affinities. This powers our **$5.51M Markdown Preservation** by identifying inelastic "Loss Leaders" and halting untargeted promotions.
+3.  **Store Segmentation (K-Means Clustering):** Applied unsupervised learning to organically group the 45-store network into distinct operational archetypes (e.g., Supercenters, Standard, Express) using `K=3`, allowing for highly targeted supply chain routing and regional performance benchmarking.
 
 ### The Technology Stack
 1. **Bronze (Raw Ingestion):** Scalable extraction using `PySpark` to partition and store our raw CSVs as **Delta Lake** tables. This guarantees ACID transactions and concurrency.

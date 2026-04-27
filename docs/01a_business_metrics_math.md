@@ -49,3 +49,20 @@ Blanket markdowns destroy margin. By predicting price elasticity, we only offer 
 - **Methodology (Reproducible via `baseline.py`):** We strictly matched every store/department's sales for a given week against its exact sales 52 weeks prior (the Last-Year-Same-Week heuristic). 
 - **Weighting:** Weeks flagged as `IsHoliday = True` received a 5x penalty weight due to their disproportionate business importance.
 - **Result:** Averaged across the 4,455 timeseries, the error was 11.85% WMAPE and $1969.91 WMAE, establishing our rigid "beat-to-deploy" ML threshold.
+
+## 7. Context-Aware Anomaly Detection Impact
+
+While traditional Isolation Forests often fall into the "Volume Trap" (flagging naturally large supercenters as anomalies), StoreCast converts raw dollars into **Dimensionless Ratios**:
+
+- **YoY Growth Ratio:** `Weekly Sales / Sales Last Year`
+- **Trend Deviation Ratio:** `Weekly Sales / 4-Week Rolling Average`
+
+By feeding the algorithm these normalized ratios, it isolates true operational decoupling. 
+- **Business Value:** Prevents stock-outs that occur from "silent" logistical failures. Assuming a 1% reduction in stock-out events across a $2.45B pipeline, this directly preserves up to **$24.5 Million** in otherwise lost top-line revenue.
+
+## 8. Store Segmentation (K-Means Clustering)
+
+Instead of using arbitrary geographical regions, StoreCast uses unsupervised learning to group stores by actual behavioral data (Size, Weekly Velocity, Markdown Response).
+
+- **Methodology:** We utilized the Elbow Method on K-Means to identify `K=3` optimal clusters.
+- **Business Value:** This organically reveals the retail taxonomy: Supercenters (High Volume, Low Margin), Standard Stores (Average), and Express Stores (Low Volume, High Agility). This allows executives to route tailored inventory assortments rather than blanketing the 45-store network with identical freight, minimizing supply chain waste.
