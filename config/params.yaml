@@ -45,12 +45,13 @@ data:
       - "markdown4"
       - "markdown5"
       - "total_markdown"
-      - "lag_1_log"
-      - "lag_5_log"
-      - "lag_52_log"
+      - "lag_1_sales"
+      - "lag_5_sales"
       - "sales_last_year"
-      - "rolling_4_wk_log_sales_avg"
+      - "rolling_4_wk_sales_avg"
       - "cpi_lag_3_month"
+      - "sin_week"
+      - "cos_week"
     categorical:
       - "store"
       - "dept"
@@ -58,17 +59,14 @@ data:
       - "isholiday"
       - "month"
       - "week_of_year"
-    passthrough:
-      - "sin_week"
-      - "cos_week"
 
 training:
   xgboost:
-    n_trials_optuna: 30
-    opt_experiment_name: "StoreCast_XGB_Optimization_V2"
+    n_trials_optuna: 2
+    opt_experiment_name: "StoreCast_XGB_Optimization_V3"
     deploy_experiment_name: "StoreCast_Production_Deployments"
     fixed_params:
-      n_estimators: 500
+      # n_estimators: 500
       random_state: 42
       enable_categorical: true
 
@@ -77,3 +75,15 @@ deployment:
     max_wmape: 8.5
     min_r2: 0.95
     max_latency_ms: 25.0
+
+observability:
+  explainability:
+    sample_size: 5000
+    export_dir: "docs/images/shap"
+    
+  drift_monitor:
+    project_name: "StoreCast MLOps Monitoring"
+    workspace_path: "workspace"
+    thresholds:
+      warning: 0.30
+      critical: 0.50
