@@ -64,8 +64,8 @@ stages:
       nfiles: 1
     - path: src/data/chronological_split.py
       hash: md5
-      md5: 143e65b543fb4b984952c6621bdf9d81
-      size: 4701
+      md5: 70f1474ea6631501735ce6c2ad0a612e
+      size: 4662
     outs:
     - path: data/ml_data
       hash: md5
