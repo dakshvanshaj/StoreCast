@@ -1,6 +1,6 @@
 # Advanced Analytics: Context-Aware Anomaly Detection
 
-While the core of the StoreCast project revolves around Supervised Demand Forecasting (XGBoost), the $16M ROI case is heavily supported by auxiliary "Data Products". One of these is the Unsupervised Anomaly Detection pipeline (`src/models/anomaly_detection.py`).
+While the core of the StoreCast project revolves around Supervised Demand Forecasting (XGBoost), the $16M ROI case is heavily supported by auxiliary "Data Products". One of these is the Unsupervised Anomaly Detection pipeline (`src/analytics/anomaly_detection.py`).
 
 This document outlines the business context, algorithmic choices, and the critical mathematical fixes implemented to ensure this model provides true enterprise value rather than "Academic Noise".
 

@@ -2,7 +2,7 @@
 
 Another critical pillar of the StoreCast project is the ability to personalize marketing and markdown strategies. Forecasting tells us *how much* to ship to a store, but it does not tell us *how to treat* that store from a promotional perspective.
 
-This document outlines the business context and mathematical logic behind the Unsupervised Store Clustering pipeline (`src/models/store_clustering.py`).
+This document outlines the business context and mathematical logic behind the Unsupervised Store Clustering pipeline (`src/analytics/store_clustering.py`).
 
 ---
 

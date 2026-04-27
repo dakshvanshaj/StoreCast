@@ -1,6 +1,6 @@
 # Advanced Analytics: Market Basket Analysis
 
-Another critical pillar of the $16M ROI case is the Market Basket Analysis pipeline (`src/models/market_basket.py`).
+Another critical pillar of the $16M ROI case is the Market Basket Analysis pipeline (`src/analytics/market_basket.py`).
 
 This document outlines the business context, algorithmic choices, and the critical mathematical fixes implemented to ensure this model provides true causal value rather than "Academic Noise".
 
