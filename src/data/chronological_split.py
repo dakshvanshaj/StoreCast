@@ -93,7 +93,7 @@ def load_ml_splits() -> tuple[Any, Any, Any, Any, Any, Any, Any, Any]:
         raise
         
 
-    features = cfg.get("data.features.numeric") + cfg.get("data.features.categorical") + cfg.get("data.features.passthrough")
+    features = cfg.get("data.features.numeric") + cfg.get("data.features.categorical")
     target = cfg.get("data.columns.target")
     holiday_col = cfg.get("data.columns.holiday")
 
