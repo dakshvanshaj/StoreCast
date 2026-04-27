@@ -62,8 +62,10 @@ repo_name: StoreCast
 
 extra:
   social:
+    - icon: fontawesome/solid/envelope
+      link: mailto:davevanshaj@gmail.com
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/daksh-vanshaj/
+
     - icon: fontawesome/brands/github
       link: https://github.com/dakshvanshaj
-
-    - icon: fontawesome/brands/linkedin
-      link: https://www.linkedin.com/in/daksh-vanshaj-9a9650344/
